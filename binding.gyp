@@ -3,7 +3,7 @@
     {
       "target_name": "analytics",
       "include_dirs": [
-        "lib/include"
+        "lib/ta-lib/include"
       ],
       'conditions': [
         [ 'OS=="mac"', {
@@ -14,10 +14,10 @@
              'MACOSX_DEPLOYMENT_TARGET': '10.7'
             },
             "libraries" : [
-              "../lib/lib/libta_abstract_csr.a",
-              "../lib/lib/libta_common_csr.a",
-              "../lib/lib/libta_func_csr.a",
-              "../lib/lib/libta_libc_csr.a"
+              "../lib/ta-lib/lib/libta_abstract_csr.a",
+              "../lib/ta-lib/lib/libta_common_csr.a",
+              "../lib/ta-lib/lib/libta_func_csr.a",
+              "../lib/ta-lib/lib/libta_libc_csr.a"
             ],
         }],
         [ 'OS=="win"', {
@@ -28,10 +28,10 @@
              'MACOSX_DEPLOYMENT_TARGET': '10.7'
             },
             "libraries" : [
-              "../lib/lib/ta_abstract_csr.lib",
-              "../lib/lib/ta_common_csr.lib",
-              "../lib/lib/ta_func_csr.lib",
-              "../lib/lib/ta_libc_csr.lib"
+              "../lib/ta-lib/lib/ta_abstract_csr.lib",
+              "../lib/ta-lib/lib/ta_common_csr.lib",
+              "../lib/ta-lib/lib/ta_func_csr.lib",
+              "../lib/ta-lib/lib/ta_libc_csr.lib"
             ],
         }],
       ],
