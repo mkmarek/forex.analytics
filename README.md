@@ -41,11 +41,11 @@ Usage
 Import the the module
 
 ```javascript
-var neuralnet = require('../build/Release/analytics.node');
+var analytics = require('../build/Release/analytics.node');
 ```
 
 or with ES6 modules syntax
 
 ```javascript
-import neuralnet from '../build/Release/analytics.node'
+import analytics from '../build/Release/analytics.node'
 ```
