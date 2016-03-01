@@ -4,7 +4,7 @@
 
 BinaryTreeFitness::BinaryTreeFitness(
     FitnessFunction eval,
-    const std::vector<std::map<std::string, IndicatorData> >& dataSet) : dataSet(dataSet){
+    const std::vector<IndicatorTuple>& dataSet) : dataSet(dataSet){
     this->eval = eval;
 }
 
@@ -12,35 +12,35 @@ void multithreadedCalculation(
     unsigned begin,
     unsigned size,
     const std::vector<BinaryTreeChromosome *>& chromosomes,
-    const std::vector<std::map<std::string, IndicatorData> >& dataSet,
+    const std::vector<IndicatorTuple>& dataSet,
     FitnessFunction eval) {
 
     for (unsigned i = begin; i < begin + size; i++) {
-        chromosomes[i]->setFitness(eval(chromosomes[i], dataSet));
+        chromosomes[i]->setFitness(eval(FitnessFunctionArgs(chromosomes[i], dataSet)));
     }
 }
 
 void BinaryTreeFitness::CalculateFitness(
     const std::vector<BinaryTreeChromosome *>& chromosomes) const {
     unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
-    unsigned count = chromosomes.size();
+	size_t count = chromosomes.size();
 
     if (concurentThreadsSupported == 0) {
         for (unsigned i = 0; i < count; i++) {
-            chromosomes[i]->setFitness(eval(chromosomes[i], this->dataSet));
+            chromosomes[i]->setFitness(eval(FitnessFunctionArgs(chromosomes[i], this->dataSet)));
         }
     } else {
 
         std::vector<std::thread *> threads;
 
-        double size = ((double)count) / concurentThreadsSupported;
+        double size = static_cast<double>(count) / concurentThreadsSupported;
         for (unsigned i = 0; i < concurentThreadsSupported; i++) {
-            int begin = ceil(i * size);
+            int begin = static_cast<int>(ceil(i * size));
 
             threads.push_back(new std::thread(
                                   multithreadedCalculation,
                                   begin,
-                                  (int)size,
+                                  static_cast<int>(size),
                                   chromosomes,
                                   this->dataSet,
                                   eval

@@ -82,9 +82,9 @@ double * outReal3;
  */
 void PrepareParameters(const std::vector<Candlestick>& candlesticks){
     this->startIdx = 0;
-    this->endIdx = candlesticks.size() - 1;
+    this->endIdx = (int)candlesticks.size() - 1;
 
-    int size = this->endIdx - this->startIdx;
+    size_t size = this->endIdx - this->startIdx;
 
     this->inOpen = new double[size];
     this->inClose = new double[size];

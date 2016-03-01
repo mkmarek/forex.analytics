@@ -97,7 +97,7 @@ std::vector<Candlestick> ConvertOHLCToLargerTimeframe(
  * @return                          Vector of data assigned to a different
  *                                  indicators in a map
  */
-const std::vector<std::map<std::string, IndicatorData> > EvaluateCandlesticks(
+std::vector<IndicatorTuple> EvaluateCandlesticks(
         const std::vector<Candlestick>& candlesticks,
         const std::vector<BaseIndicator*> &indicators);
 };

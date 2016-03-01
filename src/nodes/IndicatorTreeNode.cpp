@@ -5,12 +5,12 @@
 #include <map>
 #include <string>
 
-#include "../../include/stdafx.h"
 #include "../../include/nodes/IndicatorTreeNode.h"
-#include "../../include/indicators/factories/IndicatorFactory.h"
 
 IndicatorTreeNode::IndicatorTreeNode(
-  const std::vector<BaseIndicator*>& indicators) : _indicators(indicators) {
+  const std::vector<BaseIndicator*>& indicators) : _indicators(indicators), value(0)
+{
+	this->sign = Sign::Lt;
 }
 
 IndicatorTreeNode::~IndicatorTreeNode() {
@@ -102,11 +102,12 @@ TreeNode* IndicatorTreeNode::FromJs(
       std::string(*v8::String::Utf8Value(
         input->Get(v8::String::NewFromUtf8(isolate, "sign"))
         ->ToString()));
-    Sign s;
+
+    Sign s = Sign::Gt;
 
     for (int i = 0; i < 2; i++) {
       if (sign == SignStrings[i]) {
-        s = (Sign)i;
+        s = static_cast<Sign>(i);
       }
     }
 

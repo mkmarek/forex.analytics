@@ -1,9 +1,7 @@
 #include "../../include/stdafx.h"
 #include "../../include/nodes/OperatorTreeNode.h"
-#include "../../include/nodes/IndicatorTreeNode.h"
 
-
-OperatorTreeNode::OperatorTreeNode()
+OperatorTreeNode::OperatorTreeNode(): value()
 {
 }
 
@@ -35,7 +33,7 @@ void OperatorTreeNode::GenerateRandomValue()
 
 void OperatorTreeNode::Copy(TreeNode* destination) const
 {
-  OperatorTreeNode* node = (OperatorTreeNode*)destination;
+  OperatorTreeNode* node = static_cast<OperatorTreeNode*>(destination);
 
   node->value = this->value;
   this->left->Copy(node->left);
@@ -73,11 +71,12 @@ TreeNode* OperatorTreeNode::FromJs(
     std::string oper =
       std::string(*v8::String::Utf8Value(input->Get(v8::String::NewFromUtf8(isolate, "operator"))
         ->ToString()));
-    Operator op;
+
+    Operator op = Operator::And;
 
     for (int i = 0; i < 2; i++) {
       if (oper == OperatorStrings[i]) {
-        op = (Operator)i;
+        op = static_cast<Operator>(i);
       }
     }
 

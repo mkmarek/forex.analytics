@@ -3,9 +3,6 @@
 #include "../../include/nodes/OperatorTreeNode.h"
 #include "../../include/nodes/IndicatorTreeNode.h"
 
-#include <iostream>
-
-
 TreeNode::TreeNode()
 {
   this->left = nullptr;
