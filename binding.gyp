@@ -3,6 +3,7 @@
     {
       "target_name": "analytics",
       "include_dirs": [
+        "<!(node -e \"require('nan')\")",
         "lib/ta-lib/include"
       ],
       'conditions': [
@@ -21,12 +22,6 @@
             ],
         }],
         [ 'OS=="win"', {
-
-          'xcode_settings': {
-            'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11', '-stdlib=libc++'],
-            'OTHER_LDFLAGS': ['-stdlib=libc++'],
-             'MACOSX_DEPLOYMENT_TARGET': '10.7'
-            },
             "libraries" : [
               "../lib/ta-lib/lib/ta_abstract_csr.lib",
               "../lib/ta-lib/lib/ta_common_csr.lib",

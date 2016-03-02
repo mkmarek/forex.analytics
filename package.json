@@ -4,9 +4,9 @@
   "description": "Performs data anaylsis on a set of candlesticks and using available indicators constructs the best strategy which worked on a certain period.",
   "main": "index.js",
   "scripts": {
-   "install": "node ./lib/ta-lib/build.js && node-gyp configure && node-gyp rebuild",
-   "clean": "rm -rf ./build && rm -rf ./node_modules && node ./lib/ta-lib/clean.js"
- },
+    "install": "node ./lib/ta-lib/build.js && node-gyp configure && node-gyp rebuild",
+    "clean": "rm -rf ./build && rm -rf ./node_modules && node ./lib/ta-lib/clean.js"
+  },
   "keywords": [
     "forex",
     "analytics",
@@ -15,8 +15,7 @@
   ],
   "author": "Marek Magdziak",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "nan": "^2.2.0"
-  },
-  "dependencies": {}
+  }
 }

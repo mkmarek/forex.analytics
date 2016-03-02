@@ -52,7 +52,7 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 	double logicalNodeMutationProbability,
 	double leafIndicatorMutationProbability,
 	double crossoverProbability,
-	double* outFitness
+	std::function<void(double fitness, BinaryTreeChromosome * chromosome, int generation)> update
 )
 {
 	srand(static_cast<unsigned int>(time(nullptr)));
@@ -100,11 +100,14 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 		p_front_buffer = p_back_buffer;
 		p_back_buffer = tmp2;
 
+		heapSort.Sort(*p_back_buffer, populationCount);
+
+		update(p_back_buffer->at(populationCount - 1)->getFitness(), p_back_buffer->at(populationCount - 1), y + 1 /* Start with 1 */);
+
 		// Selection
-		selection.Select(*p_front_buffer, *p_back_buffer, heapSort, populationCount);
+		selection.Select(*p_front_buffer, *p_back_buffer, populationCount);
 	}
 
-	// Mutation and crossover
 	fitness.CalculateFitness(*p_front_buffer);
 
 	heapSort.Sort(*p_front_buffer, populationCount);

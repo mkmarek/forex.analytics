@@ -81,14 +81,11 @@ public:
 	 *
 	 * @param oldGeneration The source generation from which the most fit are picked
 	 *
-	 * @param heapSort      reference to a heap sort algorithm
-	 *
 	 * @param size          thetarget size of a generation
 	 */
 	void Select(
 		std::vector<BinaryTreeChromosome*>& newGeneration,
 		std::vector<BinaryTreeChromosome*>& oldGeneration,
-		HeapSort& heapSort,
 		unsigned size);
 
 	/**

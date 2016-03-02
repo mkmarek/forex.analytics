@@ -1,4 +1,5 @@
 // analytics.cpp
+#include <nan.h>
 #include <node.h>
 #include "../include/TradingSystem.h"
 #include "../include/TradingSimulator.h"
@@ -17,6 +18,141 @@ namespace analytics {
 	using v8::Exception;
 	using v8::Handle;
 	using v8::Boolean;
+	using v8::Int32;
+
+	// the 'baton' is the carrier for data between functions
+	struct FindStrategyBaton
+	{
+		// required
+		uv_work_s request;
+		Nan::Persistent<v8::Promise::Resolver, Nan::CopyablePersistentTraits<v8::Promise::Resolver>>* promiseResolver;
+		Nan::Persistent<v8::Function, Nan::CopyablePersistentTraits<v8::Function>>* callback;
+
+		BinaryTreeChromosome * chromosome;
+		std::vector<Candlestick> candlesticks;
+		std::vector<BaseIndicator*> indicators;
+		unsigned populationCount;
+		unsigned generationCount;
+		unsigned selectionAmount;
+		double leafValueMutationProbability;
+		double leafSignMutationProbability;
+		double logicalNodeMutationProbability;
+		double leafIndicatorMutationProbability;
+		double crossoverProbability;
+	};
+
+	struct StrategyUpdateBaton
+	{
+		// required
+		uv_async_t request;
+		Nan::Persistent<v8::Function, Nan::CopyablePersistentTraits<v8::Function>>* callback;
+
+		BinaryTreeChromosome * chromosome;
+		double fitness;
+		int generation;
+	};
+
+	template<typename T>
+	static void chromosomeToObject(T* baton, Local<Object>& strategy, Isolate* isolate)
+	{
+		Local<Object> buy = Nan::New<Object>();
+		Local<Object> sell = Nan::New<Object>();
+
+		baton->chromosome->buy->ToJs(buy, isolate);
+		baton->chromosome->sell->ToJs(sell, isolate);
+
+		strategy = Nan::New<Object>();
+		strategy->Set(v8::String::NewFromUtf8(isolate, "buy"), buy);
+		strategy->Set(v8::String::NewFromUtf8(isolate, "sell"), sell);
+	}
+
+	void updateStrategyStatusAsync(uv_async_t* handle)
+	{
+		Nan::HandleScope scope;
+
+		Isolate* isolate = Isolate::GetCurrent();
+
+		StrategyUpdateBaton *baton = static_cast<StrategyUpdateBaton *>(handle->data);
+
+		Local<Object> strategy;
+
+		chromosomeToObject(baton, strategy, isolate);
+
+		Handle<Value> argv[] =
+		{
+			strategy,
+			Handle<Value>(Nan::New<v8::Number>(baton->fitness)),
+			Handle<Value>(Nan::New<v8::Int32>(baton->generation)),
+		};
+
+		baton->callback->Get(Isolate::GetCurrent())
+			->Call(v8::Undefined(Isolate::GetCurrent()), 3, argv);
+
+		uv_close(reinterpret_cast<uv_handle_t*>(handle),
+			[](uv_handle_t* h) -> void {delete h; });
+	};
+
+
+	// called by libuv worker in separate thread
+	static void findStrategyAsync(uv_work_t *req)
+	{
+		FindStrategyBaton *baton = static_cast<FindStrategyBaton *>(req->data);
+
+		TradingSystem system;
+
+		auto update = [baton, req](double fitness, BinaryTreeChromosome * chromosome, int generation)
+		{
+			baton->chromosome = chromosome;
+
+			StrategyUpdateBaton *updateBaton = new StrategyUpdateBaton;
+			updateBaton->fitness = fitness;
+			updateBaton->chromosome = chromosome;
+			updateBaton->generation = generation;
+			updateBaton->callback = baton->callback;
+			updateBaton->request.data = updateBaton;
+
+			uv_async_init(uv_default_loop(), &updateBaton->request, &updateStrategyStatusAsync);
+			uv_async_send(&updateBaton->request);
+		};
+
+		baton->chromosome = system.PerformAnalysis(
+			baton->candlesticks,
+			baton->indicators,
+			baton->populationCount,
+			baton->generationCount,
+			baton->selectionAmount,
+			baton->leafValueMutationProbability,
+			baton->leafSignMutationProbability,
+			baton->logicalNodeMutationProbability,
+			baton->leafIndicatorMutationProbability,
+			baton->crossoverProbability,
+			update);
+	}
+
+	// called by libuv in event loop when async function completes
+	static void findStrategyAsyncAfter(uv_work_t *req, int status)
+	{
+		Nan::HandleScope scope;
+
+		Isolate* isolate = Isolate::GetCurrent();
+
+		// get the reference to the baton from the request
+		FindStrategyBaton *baton = static_cast<FindStrategyBaton *>(req->data);
+
+		Local<Object> strategy;
+
+		chromosomeToObject(baton, strategy, isolate);
+
+		baton->promiseResolver->Get(Isolate::GetCurrent())->Resolve(strategy);
+
+		baton->promiseResolver->Reset();
+		baton->callback->Reset();
+
+		delete baton->promiseResolver;
+		delete baton->callback;
+		delete baton->chromosome;
+		delete baton;
+	}
 
 	void findStrategy(const FunctionCallbackInfo<Value>& args) {
 		Isolate * isolate = args.GetIsolate();
@@ -43,8 +179,6 @@ namespace analytics {
 
 		Handle<Object> configuration = Handle<Object>::Cast(args[1]);
 		Handle<Array> candlestickArray = Handle<Array>::Cast(args[0]);
-
-		TradingSystem system;
 
 		std::vector<Candlestick> candlesticks;
 
@@ -77,32 +211,30 @@ namespace analytics {
 			indicators.push_back(indicator);
 		}
 
-		BinaryTreeChromosome * chromosome = system.PerformAnalysis(
-			candlesticks,
-			indicators,
-			populationCount,
-			generationCount,
-			selectionAmount,
-			leafValueMutationProbability,
-			leafSignMutationProbability,
-			logicalNodeMutationProbability,
-			leafIndicatorMutationProbability,
-			crossoverProbability,
-			&fitness);
+		Local<v8::Promise::Resolver> resolver = v8::Promise::Resolver::New(isolate);
+		Local<v8::Function> callback = Local<v8::Function>::Cast(args[2]);
 
-		Local<Object> buy = Object::New(isolate);
-		Local<Object> sell = Object::New(isolate);
+		FindStrategyBaton *baton = new FindStrategyBaton;
+		baton->request.data = baton;
 
-		chromosome->buy->ToJs(buy, isolate);
-		chromosome->sell->ToJs(sell, isolate);
+		baton->promiseResolver = new Nan::Persistent<v8::Promise::Resolver, Nan::CopyablePersistentTraits<v8::Promise::Resolver>>(resolver);
+		baton->callback = new Nan::Persistent<v8::Function, Nan::CopyablePersistentTraits<v8::Function>>(callback);
+		baton->candlesticks = candlesticks;
+		baton->indicators = indicators;
+		baton->populationCount = populationCount;
+		baton->generationCount = generationCount;
+		baton->selectionAmount = selectionAmount;
+		baton->leafValueMutationProbability = leafValueMutationProbability;
+		baton->leafSignMutationProbability = leafSignMutationProbability;
+		baton->logicalNodeMutationProbability = logicalNodeMutationProbability;
+		baton->leafIndicatorMutationProbability = leafIndicatorMutationProbability;
+		baton->crossoverProbability = crossoverProbability;
 
-		Local<Object> strategy = Object::New(isolate);
-		strategy->Set(v8::String::NewFromUtf8(isolate, "buy"), buy);
-		strategy->Set(v8::String::NewFromUtf8(isolate, "sell"), sell);
+		// queue the async function to the event loop
+		// the uv default loop is the node.js event loop
+		uv_queue_work(uv_default_loop(), &(baton->request), findStrategyAsync, findStrategyAsyncAfter);
 
-		args.GetReturnValue().Set(strategy);
-
-		delete chromosome;
+		args.GetReturnValue().Set(resolver->GetPromise());
 	} // findStrategy
 
 	/**
@@ -281,8 +413,8 @@ namespace analytics {
 			isolate
 			);
 
-		bool shouldBuy = chromosome->buy->Evaluate(dataSet[dataSet.size() - 2].Element);
-		bool shouldSell = chromosome->sell->Evaluate(dataSet[dataSet.size() - 2].Element);
+		bool shouldBuy = chromosome->buy->Evaluate(dataSet[dataSet.size() - 1].Element);
+		bool shouldSell = chromosome->sell->Evaluate(dataSet[dataSet.size() - 1].Element);
 
 		Local<Object> output = Object::New(isolate);
 		output->Set(v8::String::NewFromUtf8(isolate, "shouldBuy"),

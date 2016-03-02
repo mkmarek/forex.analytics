@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <functional>
 
 #include "models/Candlestick.h"
 #include "BinaryTreeChromosome.h"
@@ -68,7 +69,7 @@ BinaryTreeChromosome* PerformAnalysis(
         double logicalNodeMutationProbability,
         double leafIndicatorMutationProbability,
         double crossoverProbability,
-        double* outFitness);
+        std::function<void(double fitness, BinaryTreeChromosome * chromosome, int generation)> update);
 
 /**
  * Converts candlestick values to giher timeframe specified by second interval
@@ -93,7 +94,7 @@ std::vector<Candlestick> ConvertOHLCToLargerTimeframe(
  * @param  candlesticks             Input vector of candlesticks
  *
  * @param  indicators               Defined indicators
- * 
+ *
  * @return                          Vector of data assigned to a different
  *                                  indicators in a map
  */

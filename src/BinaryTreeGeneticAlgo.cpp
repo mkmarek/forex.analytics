@@ -23,9 +23,7 @@ BinaryTreeGeneticAlgo::~BinaryTreeGeneticAlgo() {
 void BinaryTreeGeneticAlgo::Select(
 	std::vector<BinaryTreeChromosome *>& newGeneration,
 	std::vector<BinaryTreeChromosome *>& oldGeneration,
-	HeapSort& heapSort,
 	unsigned size) {
-	heapSort.Sort(oldGeneration, size);
 
 	for (unsigned i = size - 1, y = 0; i >= size - this->select; i--, y++) {
 		newGeneration[y]->setFitness(oldGeneration[i]->getFitness());
