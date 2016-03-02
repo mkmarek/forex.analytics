@@ -56,7 +56,7 @@ function loadCsvData(inputFile, callback) {
     .on('end', function() {
       var candlesticks = parseCsv(csvContent);
 
-      setTimeout(function() { callback(candlesticks) }, 5000);
+      callback(candlesticks);
     });
 }
 
@@ -115,8 +115,6 @@ function parseCsv(text) {
       time: time
     });
   }
-
-  console.log(candlesticks[0]);
 
   return candlesticks;
 }
