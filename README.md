@@ -99,7 +99,7 @@ Finds the optimal strategy for a certain period defined by the *candlesticks* ar
 Fitness: 0.00010751596495091384; Generation: 285
  ```
 
-The returning value is a promise which when it's resolved passes one arguments with the best found strategy.
+The returning value is a promise which when it's resolved passes one argument with the best found strategy.
 
 **Full example:**
 ```javascript
