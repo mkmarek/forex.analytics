@@ -3,43 +3,63 @@
 std::map<std::string, factoryMethod>* IndicatorFactory::registeredNames = nullptr;
 std::map<std::string, BaseIndicator*>* IndicatorFactory::createdIndicators = nullptr;
 
- BaseIndicator* IndicatorFactory::Create(const std::string name) {
+BaseIndicator* IndicatorFactory::Create(const std::string name) {
 
-   if (name == "")
-    return nullptr;
+	if (name == "")
+		return nullptr;
 
-   if (IndicatorFactory::createdIndicators == nullptr) {
-      IndicatorFactory::createdIndicators = new std::map<std::string, BaseIndicator*>();
-   }
+	if (IndicatorFactory::createdIndicators == nullptr) {
+		IndicatorFactory::createdIndicators = new std::map<std::string, BaseIndicator*>();
+	}
 
-   std::map<std::string, BaseIndicator*>::iterator createdIndicator =
-    IndicatorFactory::createdIndicators->find(name);
+	std::map<std::string, BaseIndicator*>::iterator createdIndicator =
+		IndicatorFactory::createdIndicators->find(name);
 
-    if (createdIndicator != IndicatorFactory::createdIndicators->end())
-      return createdIndicator->second;
+	if (createdIndicator != IndicatorFactory::createdIndicators->end())
+		return createdIndicator->second;
 
-   std::map<std::string, factoryMethod>::iterator registeredPair =
-    IndicatorFactory::registeredNames->find(name);
+	std::map<std::string, factoryMethod>::iterator registeredPair =
+		IndicatorFactory::registeredNames->find(name);
 
-    if (registeredPair == IndicatorFactory::registeredNames->end())
-      return nullptr;
+	if (registeredPair == IndicatorFactory::registeredNames->end())
+		return nullptr;
 
-    BaseIndicator* indicator = registeredPair->second();
-    indicator->Name = name.c_str();
+	BaseIndicator* indicator = registeredPair->second();
+	indicator->Name = name.c_str();
 
-    IndicatorFactory::createdIndicators->insert(std::pair<std::string, BaseIndicator*>(name.c_str(), indicator));
+	IndicatorFactory::createdIndicators->insert(std::pair<std::string, BaseIndicator*>(name.c_str(), indicator));
 
-    return indicator;
- }
+	return indicator;
+}
+
+std::vector<BaseIndicator *> IndicatorFactory::CreateAll() {
+
+	std::vector<BaseIndicator *> indicators;
+
+	if (IndicatorFactory::createdIndicators == nullptr) {
+		IndicatorFactory::createdIndicators = new std::map<std::string, BaseIndicator*>();
+	}
+
+	for (auto iter = registeredNames->begin(); iter != registeredNames->end(); ++iter) {
+
+		BaseIndicator* indicator = iter->second();
+		indicator->Name = iter->first.c_str();
+
+		IndicatorFactory::createdIndicators->insert(std::pair<std::string, BaseIndicator*>(indicator->Name.c_str(), indicator));
+		indicators.push_back(indicator);
+	}
+
+	return indicators;
+}
 
 bool IndicatorFactory::Register(const std::string name, const factoryMethod createMethod) {
 
-   if (IndicatorFactory::registeredNames == nullptr) {
-      IndicatorFactory::registeredNames = new std::map<std::string, factoryMethod>();
-   }
+	if (IndicatorFactory::registeredNames == nullptr) {
+		IndicatorFactory::registeredNames = new std::map<std::string, factoryMethod>();
+	}
 
-  std::pair<std::map<std::string, factoryMethod>::iterator, bool> registeredPair =
-   IndicatorFactory::registeredNames->insert(std::pair<std::string, factoryMethod>(name.c_str(), createMethod));
+	std::pair<std::map<std::string, factoryMethod>::iterator, bool> registeredPair =
+		IndicatorFactory::registeredNames->insert(std::pair<std::string, factoryMethod>(name.c_str(), createMethod));
 
-  return registeredPair.second;
+	return registeredPair.second;
 }

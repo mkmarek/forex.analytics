@@ -126,7 +126,6 @@ function convertTo30MOhlc(candlesticks) {
   return analytics.convertOHLC(candlesticks, 1800);
 }
 
-
 console.log('Loading training data set');
 loadCsvData(trainingFile, function(candlesticks) {
 

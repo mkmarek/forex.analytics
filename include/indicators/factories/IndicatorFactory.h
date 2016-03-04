@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../stdafx.h"
-#include "../../models/Candlestick.h"
 #include "../../indicators/BaseIndicator.h"
 
 /**
@@ -23,6 +22,11 @@ public:
  * @return      Pointer to a BaseIndicator instance
  */
 static BaseIndicator * Create(const std::string name);
+
+/**
+* Returns a vector containing all indicators in the system
+*/
+static std::vector<BaseIndicator *> CreateAll();
 
 /**
  * Registers an indicator factory method used for creating new indicators

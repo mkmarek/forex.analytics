@@ -71,7 +71,6 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 
 	BinaryTreeFitness fitness(&(EvaluateFitness), dataSet);
 
-	// 10, 0.6, 0.16, 0.5, 0.24, 0.03
 	BinaryTreeGeneticAlgo selection = BinaryTreeGeneticAlgo(
 		selectionAmount,
 		leafValueMutationProbability,

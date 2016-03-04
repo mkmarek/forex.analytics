@@ -102,17 +102,19 @@ namespace analytics {
 
 		auto update = [baton, req](double fitness, BinaryTreeChromosome * chromosome, int generation)
 		{
-			baton->chromosome = chromosome;
+			if (baton->callback != nullptr) {
+				baton->chromosome = chromosome;
 
-			StrategyUpdateBaton *updateBaton = new StrategyUpdateBaton;
-			updateBaton->fitness = fitness;
-			updateBaton->chromosome = chromosome;
-			updateBaton->generation = generation;
-			updateBaton->callback = baton->callback;
-			updateBaton->request.data = updateBaton;
+				StrategyUpdateBaton *updateBaton = new StrategyUpdateBaton;
+				updateBaton->fitness = fitness;
+				updateBaton->chromosome = chromosome;
+				updateBaton->generation = generation;
+				updateBaton->callback = baton->callback;
+				updateBaton->request.data = updateBaton;
 
-			uv_async_init(uv_default_loop(), &updateBaton->request, &updateStrategyStatusAsync);
-			uv_async_send(&updateBaton->request);
+				uv_async_init(uv_default_loop(), &updateBaton->request, &updateStrategyStatusAsync);
+				uv_async_send(&updateBaton->request);
+			}
 		};
 
 		baton->chromosome = system.PerformAnalysis(
@@ -145,95 +147,152 @@ namespace analytics {
 
 		baton->promiseResolver->Get(Isolate::GetCurrent())->Resolve(strategy);
 
-		baton->promiseResolver->Reset();
-		baton->callback->Reset();
+		if (baton->callback != nullptr)
+		{
+			baton->callback->Reset();
+			delete baton->callback;
+		}
 
+		baton->promiseResolver->Reset();
 		delete baton->promiseResolver;
-		delete baton->callback;
 		delete baton->chromosome;
 		delete baton;
 	}
 
-	void findStrategy(const FunctionCallbackInfo<Value>& args) {
-		Isolate * isolate = args.GetIsolate();
-
-		// expecting two arguments 1. candlestick data 2. genetic algorithm settings
-		if (args.Length() < 2) {
-			// Throw an Error that is passed back to JavaScript
-			isolate->ThrowException(Exception::TypeError(
+	bool findStrategyValidateInput(const FunctionCallbackInfo<Value>& args, Isolate* isolate, Local<v8::Promise::Resolver> resolver)
+	{
+		if (args.Length() < 1) {
+			resolver->Reject(Exception::TypeError(
 				String::NewFromUtf8(isolate, "Wrong number of arguments")));
-			return;
+			return false;
 		}
 
 		if (!args[0]->IsArray()) {
-			isolate->ThrowException(Exception::TypeError(
+			resolver->Reject(Exception::TypeError(
 				String::NewFromUtf8(isolate, "Wrong first argument. Expecting array of candlesticks")));
-			return;
+			return false;
 		}
 
-		if (!args[1]->IsObject() || args[1]->IsArray()) {
-			isolate->ThrowException(Exception::TypeError(
+		if (args.Length() > 1 && (!args[1]->IsObject() || args[1]->IsArray())) {
+			resolver->Reject(Exception::TypeError(
 				String::NewFromUtf8(isolate, "Wrong second argument. Expecting object with genetic algorithm configuration")));
-			return;
+			return false;
 		}
 
-		Handle<Object> configuration = Handle<Object>::Cast(args[1]);
-		Handle<Array> candlestickArray = Handle<Array>::Cast(args[0]);
+		if (args.Length() > 2 && (!args[2]->IsFunction())) {
+			resolver->Reject(Exception::TypeError(
+				String::NewFromUtf8(isolate, "Wrong third argument. Expecting a function")));
+			return false;
+		}
 
+		return true;
+	}
+
+	int getIntOrDefault(Handle<Object> object, Isolate * isolate, const char* name, int def)
+	{
+		if (!object->Has(v8::String::NewFromUtf8(isolate, name)))
+			return def;
+
+		return object->Get(v8::String::NewFromUtf8(isolate, name))->Int32Value();
+	}
+
+	double getNumberOrDefault(Handle<Object> object, Isolate * isolate, const char* name, double def)
+	{
+		if (!object->Has(v8::String::NewFromUtf8(isolate, name)))
+			return def;
+
+		return object->Get(v8::String::NewFromUtf8(isolate, name))->NumberValue();
+	}
+
+	Handle<Object> getObjectFromArguments(const FunctionCallbackInfo<Value>& args, Isolate * isolate, int index)
+	{
+		if(args.Length() -1 >= index)
+			return Handle<Object>::Cast(args[index]);
+
+		return Object::New(isolate);
+	}
+
+	Handle<Array> getArrayFromArguments(const FunctionCallbackInfo<Value>& args, Isolate * isolate, int index)
+	{
+		if (args.Length() - 1 >= index)
+			return Handle<Array>::Cast(args[index]);
+
+		return Array::New(isolate);
+	}
+
+	void findStrategy(const FunctionCallbackInfo<Value>& args) {
 		std::vector<Candlestick> candlesticks;
-
-		Candlestick::CreateFromArray(candlesticks, candlestickArray, isolate);
-
-		int populationCount = configuration->Get(v8::String::NewFromUtf8(isolate, "populationCount"))->Int32Value();
-		int generationCount = configuration->Get(v8::String::NewFromUtf8(isolate, "generationCount"))->Int32Value();
-		int selectionAmount = configuration->Get(v8::String::NewFromUtf8(isolate, "selectionAmount"))->Int32Value();
-
-		double leafValueMutationProbability = configuration->Get(v8::String::NewFromUtf8(isolate, "leafValueMutationProbability"))->NumberValue();
-		double leafSignMutationProbability = configuration->Get(v8::String::NewFromUtf8(isolate, "leafSignMutationProbability"))->NumberValue();
-		double logicalNodeMutationProbability = configuration->Get(v8::String::NewFromUtf8(isolate, "logicalNodeMutationProbability"))->NumberValue();
-		double leafIndicatorMutationProbability = configuration->Get(v8::String::NewFromUtf8(isolate, "leafIndicatorMutationProbability"))->NumberValue();
-		double crossoverProbability = configuration->Get(v8::String::NewFromUtf8(isolate, "crossoverProbability"))->NumberValue();
-		double fitness = 0;
-
-		Handle<Array> indicatorArray = Handle<Array>::Cast(configuration->Get(v8::String::NewFromUtf8(isolate, "indicators")));
-		unsigned indicatorCount = indicatorArray->Length();
-
 		std::vector<std::string> indicatorNames;
-
-		for (unsigned i = 0; i < indicatorCount; i++) {
-			indicatorNames.push_back(std::string(*v8::String::Utf8Value(indicatorArray->Get(i)->ToString())));
-		}
-
 		std::vector<BaseIndicator *> indicators;
 
-		for (unsigned long i = 0; i < indicatorNames.size(); i++) {
-			BaseIndicator * indicator = IndicatorFactory::Create(indicatorNames[i]);
-			indicators.push_back(indicator);
+		Isolate * isolate = args.GetIsolate();
+		Local<v8::Promise::Resolver> resolver = v8::Promise::Resolver::New(isolate);
+
+		if (findStrategyValidateInput(args, isolate, resolver))
+		{
+			Handle<Array> candlestickArray = getArrayFromArguments(args, isolate, 0);
+			Handle<Object> configuration = getObjectFromArguments(args, isolate, 1);
+
+			int populationCount = getIntOrDefault(configuration, isolate, "populationCount", 100);
+			int generationCount = getIntOrDefault(configuration, isolate, "generationCount", 100);
+			int selectionAmount = getIntOrDefault(configuration, isolate, "selectionAmount", 10);
+
+			double leafValueMutationProbability = getNumberOrDefault(configuration, isolate, "leafValueMutationProbability", 0.5);
+			double leafSignMutationProbability = getNumberOrDefault(configuration, isolate, "leafSignMutationProbability", 0.3);
+			double logicalNodeMutationProbability = getNumberOrDefault(configuration, isolate, "logicalNodeMutationProbability", 0.3);
+			double leafIndicatorMutationProbability = getNumberOrDefault(configuration, isolate, "leafIndicatorMutationProbability", 0.2);
+			double crossoverProbability = getNumberOrDefault(configuration, isolate, "crossoverProbability", 0.03);
+
+			//If the indicator array is present use it to create indicators
+			if (configuration->Has(v8::String::NewFromUtf8(isolate, "indicators"))) {
+				Handle<Array> indicatorArray = Handle<Array>::Cast(configuration->Get(v8::String::NewFromUtf8(isolate, "indicators")));
+
+				for (unsigned i = 0; i < indicatorArray->Length(); i++) {
+					BaseIndicator * indicator = IndicatorFactory::Create(std::string(*v8::String::Utf8Value(indicatorArray->Get(i)->ToString())));
+					indicators.push_back(indicator);
+				}
+			}
+			else
+			{
+				//By default use all indicators
+				indicators = IndicatorFactory::CreateAll();
+			}
+
+			//Fill candlesticks from the candlestick array
+			Candlestick::CreateFromArray(candlesticks, candlestickArray, isolate);
+
+			FindStrategyBaton *baton = new FindStrategyBaton;
+
+			//Fill the baton with all data required for the calculation
+			baton->request.data = baton;
+			baton->promiseResolver = new Nan::Persistent<v8::Promise::Resolver, Nan::CopyablePersistentTraits<v8::Promise::Resolver>>(resolver);
+			baton->candlesticks = candlesticks;
+			baton->indicators = indicators;
+			baton->populationCount = populationCount;
+			baton->generationCount = generationCount;
+			baton->selectionAmount = selectionAmount;
+			baton->leafValueMutationProbability = leafValueMutationProbability;
+			baton->leafSignMutationProbability = leafSignMutationProbability;
+			baton->logicalNodeMutationProbability = logicalNodeMutationProbability;
+			baton->leafIndicatorMutationProbability = leafIndicatorMutationProbability;
+			baton->crossoverProbability = crossoverProbability;
+
+			if (args.Length() > 2)
+			{
+				Local<v8::Function> callback = Local<v8::Function>::Cast(args[2]);
+				baton->callback = new Nan::Persistent<v8::Function, Nan::CopyablePersistentTraits<v8::Function>>(callback);
+			}
+			else
+			{
+				baton->callback = nullptr;
+			}
+
+			// queue the async function to the event loop
+			// the uv default loop is the node.js event loop
+			uv_queue_work(uv_default_loop(), &(baton->request), findStrategyAsync, findStrategyAsyncAfter);
 		}
 
-		Local<v8::Promise::Resolver> resolver = v8::Promise::Resolver::New(isolate);
-		Local<v8::Function> callback = Local<v8::Function>::Cast(args[2]);
-
-		FindStrategyBaton *baton = new FindStrategyBaton;
-		baton->request.data = baton;
-
-		baton->promiseResolver = new Nan::Persistent<v8::Promise::Resolver, Nan::CopyablePersistentTraits<v8::Promise::Resolver>>(resolver);
-		baton->callback = new Nan::Persistent<v8::Function, Nan::CopyablePersistentTraits<v8::Function>>(callback);
-		baton->candlesticks = candlesticks;
-		baton->indicators = indicators;
-		baton->populationCount = populationCount;
-		baton->generationCount = generationCount;
-		baton->selectionAmount = selectionAmount;
-		baton->leafValueMutationProbability = leafValueMutationProbability;
-		baton->leafSignMutationProbability = leafSignMutationProbability;
-		baton->logicalNodeMutationProbability = logicalNodeMutationProbability;
-		baton->leafIndicatorMutationProbability = leafIndicatorMutationProbability;
-		baton->crossoverProbability = crossoverProbability;
-
-		// queue the async function to the event loop
-		// the uv default loop is the node.js event loop
-		uv_queue_work(uv_default_loop(), &(baton->request), findStrategyAsync, findStrategyAsyncAfter);
-
+		//Return a promise
 		args.GetReturnValue().Set(resolver->GetPromise());
 	} // findStrategy
 
