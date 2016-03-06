@@ -66,7 +66,7 @@ function loadCsvData(inputFile, callback) {
  */
 function createStrategy(candlesticks) {
   return analytics.findStrategy(candlesticks, {
-    populationCount: 100,
+    populationCount: 400,
     generationCount: 300,
     selectionAmount: 10,
     leafValueMutationProbability: 0.5,

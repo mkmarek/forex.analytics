@@ -4,12 +4,16 @@ INDICATOR(Momentum)(const std::vector<Candlestick>& candlesticks, int* startInde
 {
   std::vector<double> indicatorData = std::vector<double>();
 
-  //Initialize all required parameters
-  this->PrepareParameters(candlesticks);
-
   int outBeginIdx;
   int outNbElement;
   int optInTimePeriod = 14;
+
+  if (candlesticks.size() < optInTimePeriod) {
+    return indicatorData;
+  }
+
+  //Initialize all required parameters
+  this->PrepareParameters(candlesticks);
 
   //Perform the Momentum calculation
   TA_MOM(

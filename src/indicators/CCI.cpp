@@ -1,15 +1,19 @@
 #include "../../include/indicators/Indicator.h"
 
-INDICATOR(CCI)(const std::vector<Candlestick>& candlesticks, int* startIndex) 
+INDICATOR(CCI)(const std::vector<Candlestick>& candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
-
-  //Initialize all required parameters
-  this->PrepareParameters(candlesticks);
 
   int outBeginIdx;
   int outNbElement;
   int optInTimePeriod = 14;
+
+  if (candlesticks.size() < optInTimePeriod) {
+    return indicatorData;
+  }
+
+  //Initialize all required parameters
+  this->PrepareParameters(candlesticks);
 
   //Perform the CCI calculation
   TA_CCI(

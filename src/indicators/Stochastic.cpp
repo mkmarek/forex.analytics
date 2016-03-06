@@ -4,14 +4,21 @@ INDICATOR(Stochastic_D)(const std::vector<Candlestick>& candlesticks, int* start
 {
   std::vector<double> indicatorData = std::vector<double>();
 
-  //Initialize all required parameters
-  this->PrepareParameters(candlesticks);
-
   int outBeginIdx;
   int outNbElement;
   int optInFastKPeriod = 15;
   int optInSlowKPeriod = 5;
   int optInSlowDPeriod = 3;
+
+  if (candlesticks.size() < optInFastKPeriod ||
+      candlesticks.size() < optInSlowDPeriod ||
+      candlesticks.size() < optInSlowKPeriod) {
+
+        return indicatorData;
+  }
+
+  //Initialize all required parameters
+  this->PrepareParameters(candlesticks);
 
   //Perform the RSI calculation
   TA_STOCH(
@@ -56,6 +63,16 @@ INDICATOR(Stochastic_K)(const std::vector<Candlestick>& candlesticks, int* start
   int optInFastKPeriod = 15;
   int optInSlowKPeriod = 5;
   int optInSlowDPeriod = 3;
+
+  if (candlesticks.size() < optInFastKPeriod ||
+      candlesticks.size() < optInSlowDPeriod ||
+      candlesticks.size() < optInSlowKPeriod) {
+
+        return indicatorData;
+  }
+
+  //Initialize all required parameters
+  this->PrepareParameters(candlesticks);
 
   //Perform the RSI calculation
   TA_STOCH(

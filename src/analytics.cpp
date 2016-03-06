@@ -20,6 +20,16 @@ namespace analytics {
 	using v8::Boolean;
 	using v8::Int32;
 
+	const int DEFAULT_POPULATION_COUNT = 100;
+	const int DEFAULT_GENERATION_COUNT = 100;
+	const int DEFAULT_SELECTION_AMOUNT = 10;
+
+	const double DEFAULT_LEAF_VALUE_MUTATION_PROBABILITY = 0.5;
+	const double DEFAULT_LEAF_SIGN_MUTATION_PROBABILITY = 0.3;
+	const double DEFAULT_LOGICAL_NODE_MUTATION_PROBABILITY = 0.3;
+	const double DEFAULT_LEAF_INDICATOR_MUTATION_PROBABILITY = 0.2;
+	const double DEFAULT_CROSSOVER_PROBABILITY = 0.03;
+
 	// the 'baton' is the carrier for data between functions
 	struct FindStrategyBaton
 	{
@@ -31,6 +41,8 @@ namespace analytics {
 		BinaryTreeChromosome * chromosome;
 		std::vector<Candlestick> candlesticks;
 		std::vector<BaseIndicator*> indicators;
+		const char * errorMessage;
+
 		unsigned populationCount;
 		unsigned generationCount;
 		unsigned selectionAmount;
@@ -117,18 +129,23 @@ namespace analytics {
 			}
 		};
 
-		baton->chromosome = system.PerformAnalysis(
-			baton->candlesticks,
-			baton->indicators,
-			baton->populationCount,
-			baton->generationCount,
-			baton->selectionAmount,
-			baton->leafValueMutationProbability,
-			baton->leafSignMutationProbability,
-			baton->logicalNodeMutationProbability,
-			baton->leafIndicatorMutationProbability,
-			baton->crossoverProbability,
-			update);
+		try {
+			baton->chromosome = system.PerformAnalysis(
+				baton->candlesticks,
+				baton->indicators,
+				baton->populationCount,
+				baton->generationCount,
+				baton->selectionAmount,
+				baton->leafValueMutationProbability,
+				baton->leafSignMutationProbability,
+				baton->logicalNodeMutationProbability,
+				baton->leafIndicatorMutationProbability,
+				baton->crossoverProbability,
+				update);
+		} catch(const char* error) {
+				baton->errorMessage = error;
+				baton->chromosome = nullptr;
+		}
 	}
 
 	// called by libuv in event loop when async function completes
@@ -141,11 +158,17 @@ namespace analytics {
 		// get the reference to the baton from the request
 		FindStrategyBaton *baton = static_cast<FindStrategyBaton *>(req->data);
 
-		Local<Object> strategy;
+		if (baton->chromosome == nullptr) {
+			baton->promiseResolver->Get(Isolate::GetCurrent())
+				->Reject(Exception::TypeError(
+					String::NewFromUtf8(isolate, baton->errorMessage)));
+		} else {
+			Local<Object> strategy;
 
-		chromosomeToObject(baton, strategy, isolate);
+			chromosomeToObject(baton, strategy, isolate);
 
-		baton->promiseResolver->Get(Isolate::GetCurrent())->Resolve(strategy);
+			baton->promiseResolver->Get(Isolate::GetCurrent())->Resolve(strategy);
+		}
 
 		if (baton->callback != nullptr)
 		{
@@ -221,27 +244,44 @@ namespace analytics {
 	}
 
 	void findStrategy(const FunctionCallbackInfo<Value>& args) {
-		std::vector<Candlestick> candlesticks;
-		std::vector<std::string> indicatorNames;
-		std::vector<BaseIndicator *> indicators;
-
 		Isolate * isolate = args.GetIsolate();
 		Local<v8::Promise::Resolver> resolver = v8::Promise::Resolver::New(isolate);
 
 		if (findStrategyValidateInput(args, isolate, resolver))
 		{
+			std::vector<Candlestick> candlesticks;
+			std::vector<std::string> indicatorNames;
+			std::vector<BaseIndicator *> indicators;
+
 			Handle<Array> candlestickArray = getArrayFromArguments(args, isolate, 0);
 			Handle<Object> configuration = getObjectFromArguments(args, isolate, 1);
 
-			int populationCount = getIntOrDefault(configuration, isolate, "populationCount", 100);
-			int generationCount = getIntOrDefault(configuration, isolate, "generationCount", 100);
-			int selectionAmount = getIntOrDefault(configuration, isolate, "selectionAmount", 10);
+			int populationCount = getIntOrDefault(
+				configuration, isolate, "populationCount", DEFAULT_POPULATION_COUNT);
+			int generationCount = getIntOrDefault(
+				configuration, isolate, "generationCount", DEFAULT_GENERATION_COUNT);
+			int selectionAmount = getIntOrDefault(
+				configuration, isolate, "selectionAmount", DEFAULT_SELECTION_AMOUNT);
 
-			double leafValueMutationProbability = getNumberOrDefault(configuration, isolate, "leafValueMutationProbability", 0.5);
-			double leafSignMutationProbability = getNumberOrDefault(configuration, isolate, "leafSignMutationProbability", 0.3);
-			double logicalNodeMutationProbability = getNumberOrDefault(configuration, isolate, "logicalNodeMutationProbability", 0.3);
-			double leafIndicatorMutationProbability = getNumberOrDefault(configuration, isolate, "leafIndicatorMutationProbability", 0.2);
-			double crossoverProbability = getNumberOrDefault(configuration, isolate, "crossoverProbability", 0.03);
+			double leafValueMutationProbability = getNumberOrDefault(
+				configuration, isolate, "leafValueMutationProbability",
+				DEFAULT_LEAF_VALUE_MUTATION_PROBABILITY);
+
+			double leafSignMutationProbability = getNumberOrDefault(
+				configuration, isolate, "leafSignMutationProbability",
+				DEFAULT_LEAF_SIGN_MUTATION_PROBABILITY);
+
+			double logicalNodeMutationProbability = getNumberOrDefault(
+				configuration, isolate, "logicalNodeMutationProbability",
+				DEFAULT_LOGICAL_NODE_MUTATION_PROBABILITY);
+
+			double leafIndicatorMutationProbability = getNumberOrDefault(
+				configuration, isolate, "leafIndicatorMutationProbability",
+				DEFAULT_LEAF_INDICATOR_MUTATION_PROBABILITY);
+
+			double crossoverProbability = getNumberOrDefault(
+				configuration, isolate, "crossoverProbability",
+				DEFAULT_CROSSOVER_PROBABILITY);
 
 			//If the indicator array is present use it to create indicators
 			if (configuration->Has(v8::String::NewFromUtf8(isolate, "indicators"))) {

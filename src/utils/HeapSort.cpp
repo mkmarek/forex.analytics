@@ -9,7 +9,7 @@ HeapSort::~HeapSort(){
 }
 
 
-void shift_down(std::vector<BinaryTreeChromosome *>& heap, size_t i, size_t max){
+inline void shift_down(std::vector<BinaryTreeChromosome *>& heap, size_t i, size_t max){
 	size_t i_big, c1, c2;
 
     while (i < max) {
@@ -31,7 +31,7 @@ void shift_down(std::vector<BinaryTreeChromosome *>& heap, size_t i, size_t max)
 }
 
 
-void to_heap(std::vector<BinaryTreeChromosome *>& arr, size_t size){
+inline void to_heap(std::vector<BinaryTreeChromosome *>& arr, size_t size){
 	int i = static_cast<int>(size / 2) - 1;
 
     while (i >= 0) {
@@ -41,7 +41,7 @@ void to_heap(std::vector<BinaryTreeChromosome *>& arr, size_t size){
 }
 
 
-void heap_sort(std::vector<BinaryTreeChromosome *>& arr, size_t size){
+inline void heap_sort(std::vector<BinaryTreeChromosome *>& arr, size_t size){
     to_heap(arr, size);
 	size_t end = size - 1;
     while (end > 0) {

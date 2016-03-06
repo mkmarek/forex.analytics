@@ -92,8 +92,8 @@ std::vector<Trade> TradingSimulator::Simulate(
                 start = &(data[i].Element.begin()->second.candlestick);
             }
 
-            double intermediateProffit = data[i].Element.begin()->second.candlestick.Close - start->Close;
-            double intermediateLoss = start->Close - data[i].Element.begin()->second.candlestick.Close;
+            double intermediateProffit = data[i].Element.begin()->second.candlestick.High - start->Close;
+            double intermediateLoss = start->Close - data[i].Element.begin()->second.candlestick.Low;
 
             if (intermediateLoss > maximumPotentialLoss)
               maximumPotentialLoss = intermediateLoss;
@@ -125,8 +125,8 @@ std::vector<Trade> TradingSimulator::Simulate(
                 start = &(data[i].Element.begin()->second.candlestick);
             }
 
-            double intermediateProffit = start->Close - data[i].Element.begin()->second.candlestick.Close;
-            double intermediateLoss = data[i].Element.begin()->second.candlestick.Close - start->Close;
+            double intermediateProffit = start->Close - data[i].Element.begin()->second.candlestick.Low;
+            double intermediateLoss = data[i].Element.begin()->second.candlestick.High - start->Close;
 
             if (intermediateLoss > maximumPotentialLoss)
               maximumPotentialLoss = intermediateLoss;

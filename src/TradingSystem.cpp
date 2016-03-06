@@ -11,7 +11,7 @@
  * @param  data       input data containing generated indicator values
  * @return            fitness of the passed chromosome
  */
-double EvaluateFitness(FitnessFunctionArgs args)
+inline double EvaluateFitness(FitnessFunctionArgs args)
 {
 	TradingSimulator simulator;
 	std::vector<Trade> trades = simulator.Simulate(args.chromosome, args.data);
@@ -35,7 +35,6 @@ double EvaluateFitness(FitnessFunctionArgs args)
 		{
 			points -= abs(revenue) / duration;
 		}
-
 	}
 
 	return points;
@@ -201,7 +200,12 @@ std::vector<IndicatorTuple> TradingSystem::EvaluateCandlesticks(
 		BaseIndicator* indicator = indicators[i];
 
 		int indicatorStart = 0;
+
 		const std::vector<double>& indicatorValue = indicator->GetIndicatorData(candlesticks, &indicatorStart);
+
+		if (indicatorValue.size() == 0) {
+			throw "Unsufficient amount of input candlesticks";
+		}
 
 		std::vector<IndicatorData> data(indicatorValue.size());
 
@@ -217,22 +221,20 @@ std::vector<IndicatorTuple> TradingSystem::EvaluateCandlesticks(
 		if (indicatorStart > start) start = indicatorStart;
 	}
 
-	for (unsigned long i = 0; i < indicators.size(); i++)
+	for (auto iter = indicatorValues.begin(); iter != indicatorValues.end(); ++iter)
 	{
-		BaseIndicator* indicator = indicators[i];
-
-		std::vector<IndicatorData>& data = indicatorValues[indicator->Name];
-
+		auto collection = iter->second;
 		// delete unnecessary values
-		data.erase(data.begin(), data.begin() + (start - data.begin()->offset));
+		collection.erase(collection.begin(), collection.begin() + (start - collection.begin()->offset));
 	}
 
 	for (unsigned long y = 0; y < candlesticks.size() - start; y++)
 	{
 		std::map<std::string, IndicatorData> element;
-		for (unsigned long i = 0; i < indicators.size(); i++)
+
+		for (auto iter = indicatorValues.begin(); iter != indicatorValues.end(); ++iter)
 		{
-			element.insert(std::make_pair(indicators[i]->Name, (indicatorValues[indicators[i]->Name])[y]));
+			element.insert(std::make_pair(iter->first, iter->second[y]));
 		}
 
 		values.push_back(element);

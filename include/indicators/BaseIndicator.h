@@ -95,9 +95,7 @@ void PrepareParameters(const std::vector<Candlestick>& candlesticks){
     this->outReal2 = new double[size];
     this->outReal3 = new double[size];
 
-    int i;
-
-    for (i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         this->inOpen[i] = candlesticks.at(i).Open;
         this->inClose[i] = candlesticks.at(i).Close;
         this->inHigh[i] = candlesticks.at(i).High;

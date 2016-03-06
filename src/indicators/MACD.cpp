@@ -4,14 +4,21 @@ INDICATOR(MACD)(const std::vector<Candlestick>& candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
 
-  //Initialize all required parameters
-  this->PrepareParameters(candlesticks);
-
   int outBeginIdx;
   int outNbElement;
   int optInFastPeriod = 12;
   int optInSlowPeriod = 26;
   int optInSignalPeriod = 9;
+
+  if (candlesticks.size() < optInFastPeriod ||
+      candlesticks.size() < optInSlowPeriod ||
+      candlesticks.size() < optInSignalPeriod) {
+
+        return indicatorData;
+  }
+
+  //Initialize all required parameters
+  this->PrepareParameters(candlesticks);
 
   //Perform the RSI calculation
   TA_MACD(
@@ -45,14 +52,21 @@ INDICATOR(MACD_Signal)(const std::vector<Candlestick>& candlesticks, int* startI
 {
   std::vector<double> indicatorData = std::vector<double>();
 
-  //Initialize all required parameters
-  this->PrepareParameters(candlesticks);
-
   int outBeginIdx;
   int outNbElement;
   int optInFastPeriod = 12;
   int optInSlowPeriod = 26;
   int optInSignalPeriod = 9;
+
+  if (candlesticks.size() < optInFastPeriod ||
+      candlesticks.size() < optInSlowPeriod ||
+      candlesticks.size() < optInSignalPeriod) {
+
+        return indicatorData;
+  }
+
+  //Initialize all required parameters
+  this->PrepareParameters(candlesticks);
 
   //Perform the RSI calculation
   TA_MACD(
@@ -86,14 +100,22 @@ INDICATOR(MACD_Histogram)(const std::vector<Candlestick>& candlesticks, int* sta
 {
   std::vector<double> indicatorData = std::vector<double>();
 
-  //Initialize all required parameters
-  this->PrepareParameters(candlesticks);
 
   int outBeginIdx;
   int outNbElement;
   int optInFastPeriod = 12;
   int optInSlowPeriod = 26;
   int optInSignalPeriod = 9;
+
+  if (candlesticks.size() < optInFastPeriod ||
+      candlesticks.size() < optInSlowPeriod ||
+      candlesticks.size() < optInSignalPeriod) {
+
+        return indicatorData;
+  }
+
+  //Initialize all required parameters
+  this->PrepareParameters(candlesticks);
 
   //Perform the RSI calculation
   TA_MACD(

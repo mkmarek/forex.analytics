@@ -8,7 +8,7 @@ BinaryTreeFitness::BinaryTreeFitness(
     this->eval = eval;
 }
 
-void multithreadedCalculation(
+inline void multithreadedCalculation(
     unsigned begin,
     unsigned size,
     const std::vector<BinaryTreeChromosome *>& chromosomes,

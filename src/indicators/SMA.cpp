@@ -4,13 +4,18 @@ INDICATOR(SMA15_SMA50)(const std::vector<Candlestick>& candlesticks, int* startI
 {
   std::vector<double> indicatorData = std::vector<double>();
 
-  //Initialize all required parameters
-  this->PrepareParameters(candlesticks);
-
   int outBeginIdx;
   int outNbElement;
   int optInTimePeriod1 = 15;
   int optInTimePeriod2 = 50;
+
+  if (candlesticks.size() < optInTimePeriod1 ||
+      candlesticks.size() < optInTimePeriod2) {
+        return indicatorData;
+  }
+
+  //Initialize all required parameters
+  this->PrepareParameters(candlesticks);
 
   //Perform the RSI calculation
   TA_SMA(
