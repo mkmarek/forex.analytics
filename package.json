@@ -11,7 +11,7 @@
     "url": "https://github.com/mkmarek/forex.analytics.git"
   },
   "scripts": {
-    "preinstall": "node ./lib/ta-lib/build.js && node-gyp configure && node-gyp rebuild",
+    "preinstall": "node ./lib/ta-lib/build.js",
     "clean": "rm -rf ./build && rm -rf ./node_modules && node ./lib/ta-lib/clean.js",
     "test": "node mocha"
   },
