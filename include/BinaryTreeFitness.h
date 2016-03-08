@@ -22,13 +22,14 @@ public:
 struct FitnessFunctionArgs {
 public:
 	BinaryTreeChromosome* chromosome;
-	const std::vector<IndicatorTuple>& data;
+	const std::vector<IndicatorTuple>* data;
 
 	FitnessFunctionArgs(
 		BinaryTreeChromosome* chromosome,
-		const std::vector<IndicatorTuple>& data) : data(data) {
+		const std::vector<IndicatorTuple>* data) {
 
 		this->chromosome = chromosome;
+		this->data = data;
 	}
 };
 
@@ -53,7 +54,7 @@ private:
 	/**
 	 * Dataset used for calculating fitness
 	 */
-	const std::vector<IndicatorTuple>& dataSet;
+	const std::vector<IndicatorTuple>* dataSet;
 
 public:
 
@@ -66,7 +67,7 @@ public:
 	 */
 	BinaryTreeFitness(
 		FitnessFunction eval,
-		const std::vector<IndicatorTuple>&dataSet
+		const std::vector<IndicatorTuple>* dataSet
 		);
 
 	/**
@@ -75,5 +76,5 @@ public:
 	 *                    forming a generation
 	 */
 	void CalculateFitness(
-		const std::vector<BinaryTreeChromosome*>& chromosomes) const;
+		const std::vector<BinaryTreeChromosome*>* chromosomes) const;
 };

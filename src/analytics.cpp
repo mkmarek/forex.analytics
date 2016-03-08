@@ -440,11 +440,13 @@ namespace analytics {
 			isolate
 			);
 
-		std::vector<Trade> trades = simulator.Simulate(chromosome, dataSet);
+		std::vector<Trade>* trades = simulator.Simulate(chromosome, &dataSet);
 
 		Local<Array> output = Array::New(isolate);
 
-		Trade::ToArray(trades, output, isolate);
+		Trade::ToArray(*trades, output, isolate);
+
+		delete trades;
 
 		args.GetReturnValue().Set(output);
 

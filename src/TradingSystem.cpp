@@ -3,6 +3,8 @@
 #include "../include/TradingSimulator.h"
 
 #include <time.h>
+#include <chrono>
+#include <thread>
 
 /**
  * Fitness fucntion for chromosome quality evaluation
@@ -14,16 +16,16 @@
 inline double EvaluateFitness(FitnessFunctionArgs args)
 {
 	TradingSimulator simulator;
-	std::vector<Trade> trades = simulator.Simulate(args.chromosome, args.data);
+	std::vector<Trade>* trades = simulator.Simulate(args.chromosome, args.data);
 
 	double points = 0;
 
-	for (unsigned long i = 0; i < trades.size(); i++)
+	for (unsigned long i = 0; i < trades->size(); i++)
 	{
-		double revenue = trades[i].getRevenue();
-		int duration = trades[i].End.Time - trades[i].Start.Time;
+		double revenue = trades->at(i).getRevenue();
+		int duration = trades->at(i).End->Time - trades->at(i).Start->Time;
 
-		if (trades[i].MaximumLoss > 0.0010) {
+		if (trades->at(i).MaximumLoss > 0.0010) {
 			points -= 0.0010 / duration;
 		}
 		else if (revenue > 0.0005) //shorter trades than one day
@@ -36,6 +38,8 @@ inline double EvaluateFitness(FitnessFunctionArgs args)
 			points -= abs(revenue) / duration;
 		}
 	}
+
+	delete trades;
 
 	return points;
 }
@@ -68,7 +72,7 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 		back_buffer.push_back(new BinaryTreeChromosome());
 	}
 
-	BinaryTreeFitness fitness(&(EvaluateFitness), dataSet);
+	BinaryTreeFitness fitness(&(EvaluateFitness), &dataSet);
 
 	BinaryTreeGeneticAlgo selection = BinaryTreeGeneticAlgo(
 		selectionAmount,
@@ -83,6 +87,9 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 	{
 		front_buffer[i]->GenerateTree(4, indicators);
 		back_buffer[i]->GenerateTree(4, indicators);
+
+		front_buffer[i]->setFitness(0);
+		back_buffer[i]->setFitness(0);
 	}
 	HeapSort heapSort;
 
@@ -92,7 +99,7 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 
 	for (unsigned y = 0; y < generationCount; y++)
 	{
-		fitness.CalculateFitness(*p_front_buffer);
+		fitness.CalculateFitness(p_front_buffer);
 
 		tmp2 = p_front_buffer;
 		p_front_buffer = p_back_buffer;
@@ -103,10 +110,10 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 		update(p_back_buffer->at(populationCount - 1)->getFitness(), p_back_buffer->at(populationCount - 1), y + 1 /* Start with 1 */);
 
 		// Selection
-		selection.Select(*p_front_buffer, *p_back_buffer, populationCount);
+		selection.Select(p_front_buffer, p_back_buffer, populationCount);
 	}
 
-	fitness.CalculateFitness(*p_front_buffer);
+	fitness.CalculateFitness(p_front_buffer);
 
 	heapSort.Sort(*p_front_buffer, populationCount);
 

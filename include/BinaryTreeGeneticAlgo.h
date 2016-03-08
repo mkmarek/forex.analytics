@@ -84,8 +84,8 @@ public:
 	 * @param size          thetarget size of a generation
 	 */
 	void Select(
-		std::vector<BinaryTreeChromosome*>& newGeneration,
-		std::vector<BinaryTreeChromosome*>& oldGeneration,
+		std::vector<BinaryTreeChromosome*>* newGeneration,
+		std::vector<BinaryTreeChromosome*>* oldGeneration,
 		unsigned size);
 
 	/**
@@ -96,7 +96,7 @@ public:
 	 * @param outputChromosome The newly generated chromosome
 	 */
 	void Mutate(
-		std::vector<BinaryTreeChromosome*>& chromosomeInput,
+		std::vector<BinaryTreeChromosome*>* chromosomeInput,
 		unsigned size,
 		BinaryTreeChromosome* outputChromosome);
 
@@ -104,7 +104,7 @@ public:
 	 * Performs a crossover in a certain generation
 	 * @param generation Vector of chromosomes representing one generation
 	 */
-	void Crossover(std::vector<BinaryTreeChromosome*>& generation);
+	void Crossover(std::vector<BinaryTreeChromosome*>* generation);
 
 	/**
 	 * Performs crossover with two chromosomes switching their buy and sell

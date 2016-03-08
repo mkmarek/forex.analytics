@@ -2,8 +2,8 @@
 
 double Trade::getRevenue() const {
     return this->Buy ?
-           this->End.Close - this->Start.Close :
-           this->Start.Close - this->End.Close;
+           this->End->Close - this->Start->Close :
+           this->Start->Close - this->End->Close;
 }
 
 void Trade::ToArray(
@@ -45,8 +45,8 @@ void Trade::ToObject(
     v8::Local<v8::Object> start = v8::Object::New(isolate);
     v8::Local<v8::Object> end = v8::Object::New(isolate);
 
-    Candlestick::ToObject(trade.Start, start, isolate);
-    Candlestick::ToObject(trade.End, end, isolate);
+    Candlestick::ToObject(*trade.Start, start, isolate);
+    Candlestick::ToObject(*trade.End, end, isolate);
 
     output->Set(v8::String::NewFromUtf8(isolate, "start"),
                 start);
@@ -55,45 +55,45 @@ void Trade::ToObject(
 
 }
 
-std::vector<Trade> TradingSimulator::Simulate(
+std::vector<Trade>* TradingSimulator::Simulate(
     const BinaryTreeChromosome * chromosome,
-    const std::vector<IndicatorTuple>& data) const {
+    const std::vector<IndicatorTuple>* data) const {
     bool shouldBuy, shouldSell, buy = false;
-    std::vector<Trade> trades;
+    std::vector<Trade>* trades = new std::vector<Trade>();
 
     const Candlestick * start = nullptr;
     double maximumPotentialLoss = 0.0;
     double maximumPotentialProffit = 0.0;
 
-    for (unsigned long i = 0; i < data.size(); i++) {
-        shouldBuy = chromosome->buy->Evaluate(data[i].Element);
-        shouldSell = chromosome->sell->Evaluate(data[i].Element);
+    for (unsigned long i = 0; i < data->size(); i++) {
+        shouldBuy = chromosome->buy->Evaluate(data->at(i).Element);
+        shouldSell = chromosome->sell->Evaluate(data->at(i).Element);
 
         if (shouldBuy == true && shouldSell == false) {
             // if we're in trade and we're selling then close it and start a new one
             if (start != nullptr && buy == false) {
 
                 Trade t;
-                t.Start = *start;
-                t.End = data[i].Element.begin()->second.candlestick;
+                t.Start = start;
+                t.End = &data->at(i).Element.begin()->second.candlestick;
                 t.Buy = buy;
                 t.MaximumProffit = maximumPotentialProffit;
                 t.MaximumLoss = maximumPotentialLoss;
 
-                trades.push_back(t);
+                trades->push_back(t);
 
-                start = &(data[i].Element.begin()->second.candlestick);
+                start = &(data->at(i).Element.begin()->second.candlestick);
 
                 maximumPotentialLoss = 0.0;
                 maximumPotentialProffit = 0.0;
             }
             // or if not in trade at all
             else if (start == nullptr) {
-                start = &(data[i].Element.begin()->second.candlestick);
+                start = &(data->at(i).Element.begin()->second.candlestick);
             }
 
-            double intermediateProffit = data[i].Element.begin()->second.candlestick.High - start->Close;
-            double intermediateLoss = start->Close - data[i].Element.begin()->second.candlestick.Low;
+            double intermediateProffit = data->at(i).Element.begin()->second.candlestick.High - start->Close;
+            double intermediateLoss = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
 
             if (intermediateLoss > maximumPotentialLoss)
               maximumPotentialLoss = intermediateLoss;
@@ -108,25 +108,25 @@ std::vector<Trade> TradingSimulator::Simulate(
             if (start != nullptr && buy == true) {
 
                 Trade t;
-                t.Start = *start;
-                t.End = data[i].Element.begin()->second.candlestick;
+                t.Start = start;
+                t.End = &data->at(i).Element.begin()->second.candlestick;
                 t.Buy = buy;
                 t.MaximumProffit = maximumPotentialProffit;
                 t.MaximumLoss = maximumPotentialLoss;
 
-                trades.push_back(t);
+                trades->push_back(t);
 
-                start = &(data[i].Element.begin()->second.candlestick);
+                start = &(data->at(i).Element.begin()->second.candlestick);
 
                 maximumPotentialLoss = 0.0;
                 maximumPotentialProffit = 0.0;
 
             } else if (start == nullptr) {
-                start = &(data[i].Element.begin()->second.candlestick);
+                start = &(data->at(i).Element.begin()->second.candlestick);
             }
 
-            double intermediateProffit = start->Close - data[i].Element.begin()->second.candlestick.Low;
-            double intermediateLoss = data[i].Element.begin()->second.candlestick.High - start->Close;
+            double intermediateProffit = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
+            double intermediateLoss = data->at(i).Element.begin()->second.candlestick.High - start->Close;
 
             if (intermediateLoss > maximumPotentialLoss)
               maximumPotentialLoss = intermediateLoss;

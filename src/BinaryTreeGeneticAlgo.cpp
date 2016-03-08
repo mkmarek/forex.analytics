@@ -21,19 +21,19 @@ BinaryTreeGeneticAlgo::~BinaryTreeGeneticAlgo() {
 }
 
 void BinaryTreeGeneticAlgo::Select(
-	std::vector<BinaryTreeChromosome *>& newGeneration,
-	std::vector<BinaryTreeChromosome *>& oldGeneration,
+	std::vector<BinaryTreeChromosome *>* newGeneration,
+	std::vector<BinaryTreeChromosome *>* oldGeneration,
 	unsigned size) {
 
 	for (unsigned i = size - 1, y = 0; i >= size - this->select; i--, y++) {
-		newGeneration[y]->setFitness(oldGeneration[i]->getFitness());
+		newGeneration->at(y)->setFitness(oldGeneration->at(i)->getFitness());
 
-		oldGeneration[i]->buy->Copy(newGeneration[y]->buy);
-		oldGeneration[i]->sell->Copy(newGeneration[y]->sell);
+		oldGeneration->at(i)->buy->Copy(newGeneration->at(y)->buy);
+		oldGeneration->at(i)->sell->Copy(newGeneration->at(y)->sell);
 	}
 
 	for (unsigned i = this->select; i < size; i++) {
-		this->Mutate(newGeneration, this->select, newGeneration[i]);
+		this->Mutate(newGeneration, this->select, newGeneration->at(i));
 	}
 
 	this->Crossover(newGeneration);
@@ -44,7 +44,7 @@ unsigned factorial(unsigned n) {
 }
 
 void BinaryTreeGeneticAlgo::Mutate(
-	std::vector<BinaryTreeChromosome *>& generation,
+	std::vector<BinaryTreeChromosome *>* generation,
 	unsigned size,
 	BinaryTreeChromosome * outputChromosome) {
 	unsigned maxRand = factorial(size);
@@ -54,8 +54,8 @@ void BinaryTreeGeneticAlgo::Mutate(
 	for (; index < size && factorial(index) < rnd; index++) {
 	}
 
-	generation[index]->buy->Copy(outputChromosome->buy);
-	generation[index]->sell->Copy(outputChromosome->sell);
+	generation->at(index)->buy->Copy(outputChromosome->buy);
+	generation->at(index)->sell->Copy(outputChromosome->sell);
 
 	this->Mutate(outputChromosome->buy);
 	this->Mutate(outputChromosome->sell);
@@ -96,17 +96,17 @@ void BinaryTreeGeneticAlgo::Mutate(TreeNode * node) {
 	}
 } // BinaryTreeGeneticAlgo::Mutate
 
-void BinaryTreeGeneticAlgo::Crossover(std::vector<BinaryTreeChromosome *>& generation) {
-	for (unsigned long i = this->select + 1; i < generation.size(); i++) {
+void BinaryTreeGeneticAlgo::Crossover(std::vector<BinaryTreeChromosome *>* generation) {
+	for (unsigned long i = this->select + 1; i < generation->size(); i++) {
 		double crossover = static_cast<double>(rand() % 100) / 100;
 
 		if (crossover <= this->crossoverProbability) {
 			unsigned long rnd = i;
 
 			while (rnd == i || rnd <= this->select)
-				rnd = rand() % generation.size();
+				rnd = rand() % generation->size();
 
-			this->Crossover(generation[i], generation[rnd]);
+			this->Crossover(generation->at(i), generation->at(rnd));
 		}
 	}
 }

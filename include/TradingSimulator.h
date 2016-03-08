@@ -16,12 +16,12 @@ public:
 	/**
 	 * Candlestic defining entry of this specific trade
 	 */
-	Candlestick Start;
+	const Candlestick* Start;
 
 	/**
 	 * Candlestic defining exit of this specific trade
 	 */
-	Candlestick End;
+	const Candlestick* End;
 
 	/**
 	 * Is true when a trades was started with a buy action and false it with sell
@@ -84,7 +84,7 @@ public:
 	 * @param data      Input data used for trade evaluation
 	 * @return          Vector of trades made with passed strategy and test data
 	 */
-	std::vector<Trade> Simulate(
+	std::vector<Trade>* Simulate(
 		const BinaryTreeChromosome* chromosome,
-		const std::vector<IndicatorTuple>& data) const;
+		const std::vector<IndicatorTuple>* data) const;
 };
