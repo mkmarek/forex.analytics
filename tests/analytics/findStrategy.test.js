@@ -2,7 +2,7 @@ var assert = require('assert'),
   chai = require('chai'),
   expect = chai.expect,
   should = chai.should(),
-  analytics = require('../../build/Release/analytics.node'),
+  analytics = require('../../index'),
   candlesticks = require('../candlesticks');
 
 
@@ -38,7 +38,7 @@ describe('analytics', function() {
       });
 
       it('should throw validation error because at least candlestick parameter is required', function() {
-        expect('' + error).to.be.equal('TypeError: Wrong number of arguments');
+        expect('' + error).to.be.equal('TypeError: Wrong first argument. Expecting array of candlesticks');
       });
     });
 

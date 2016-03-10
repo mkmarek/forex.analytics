@@ -16,7 +16,7 @@ const double DEFAULT_CROSSOVER_PROBABILITY = 0.03;
 // the 'baton' is the carrier for data between functions
 struct FindStrategyBaton
 {
-	Nan::Callback* callback;
+	Nan::Callback* progress;
 
 	BinaryTreeChromosome* chromosome;
 	std::vector<Candlestick> candlesticks;
@@ -68,19 +68,19 @@ public:
 	void Execute(const ExecutionProgress& progress) override
 	{
 		TradingSystem system;
-		Nan::Callback* callback = this->baton->callback;
+		Nan::Callback* callback = this->baton->progress;
 		ExecutionProgress* pp = &const_cast<ExecutionProgress&>(progress);
 
 		auto update = [callback, pp](double fitness, BinaryTreeChromosome* chromosome, int generation)
 		{
 			if (callback != nullptr)
 			{
-				StrategyUpdateBaton* updateBaton = new StrategyUpdateBaton;
-				updateBaton->fitness = fitness;
-				updateBaton->chromosome = chromosome;
-				updateBaton->generation = generation;
+				StrategyUpdateBaton updateBaton;
+				updateBaton.fitness = fitness;
+				updateBaton.chromosome = chromosome;
+				updateBaton.generation = generation;
 
-				pp->Send(reinterpret_cast<const char*>(updateBaton), sizeof(StrategyUpdateBaton));
+				pp->Send(reinterpret_cast<const char*>(&updateBaton), sizeof(StrategyUpdateBaton));
 			}
 		};
 
@@ -111,25 +111,57 @@ public:
 
 		if (baton->chromosome == nullptr) {
 
-			this->GetFromPersistent("resolver").As<v8::Promise::Resolver>()
-				->Reject(Nan::Error(baton->errorMessage));
+			v8::Handle<v8::Value> argv[] =
+			{
+				Nan::Undefined(),
+				v8::Exception::TypeError(
+					Nan::New<v8::String>(baton->errorMessage).ToLocalChecked())
+			};
+
+			this->callback->Call(2, argv);
 		}
 		else {
 			v8::Local<v8::Object> strategy;
 
 			chromosomeToObject(baton, strategy);
 
-			this->GetFromPersistent("resolver").As<v8::Promise::Resolver>()
-				->Resolve(strategy);
+			v8::Handle<v8::Value> argv[] =
+			{
+				strategy,
+				Nan::Undefined()
+			};
+
+			this->callback->Call(2, argv);
 		}
+
+		if (baton->progress != nullptr)
+			delete baton->progress;
+
+		if (baton->chromosome != nullptr)
+			delete baton->chromosome;
+
+		delete baton;
 	}
 
 	virtual void HandleErrorCallback() override {
 		Nan::HandleScope scope;
 
-		this->GetFromPersistent("resolver").As<v8::Promise::Resolver>()
-			->Reject(v8::Exception::Error(
-				Nan::New<v8::String>(ErrorMessage()).ToLocalChecked()));
+		v8::Handle<v8::Value> argv[] =
+		{
+			Nan::Undefined(),
+			v8::Exception::TypeError(
+				Nan::New<v8::String>(ErrorMessage()).ToLocalChecked())
+		};
+
+		this->callback->Call(2, argv);
+
+		if (baton->progress != nullptr)
+			delete baton->progress;
+
+		if (baton->chromosome != nullptr)
+			delete baton->chromosome;
+
+		delete baton;
 	}
 
 	void HandleProgressCallback(const char* data, size_t size) override
@@ -149,14 +181,14 @@ public:
 			v8::Handle<v8::Value>(Nan::New<v8::Int32>(updateBaton->generation)),
 		};
 
-		this->baton->callback->Call(3, argv);
+		this->baton->progress->Call(3, argv);
 	}
 
 private:
 	FindStrategyBaton* baton;
 };
 
-bool findStrategyValidateInput(const Nan::FunctionCallbackInfo<v8::Value>& args, v8::Local<v8::Promise::Resolver> resolver)
+bool findStrategyValidateInput(const Nan::FunctionCallbackInfo<v8::Value>& args)
 {
 	if (args.Length() < 1)
 	{
@@ -170,15 +202,21 @@ bool findStrategyValidateInput(const Nan::FunctionCallbackInfo<v8::Value>& args,
 		return false;
 	}
 
-	if (args.Length() > 1 && (!args[1]->IsObject() || args[1]->IsArray()))
+	if (!args[1]->IsUndefined() && (!args[1]->IsObject() || args[1]->IsArray()))
 	{
 		Nan::ThrowTypeError("Wrong second argument. Expecting object with genetic algorithm configuration");
 		return false;
 	}
 
-	if (args.Length() > 2 && (!args[2]->IsFunction()))
+	if (!args[2]->IsUndefined() && (!args[2]->IsFunction()))
 	{
 		Nan::ThrowTypeError("Wrong third argument. Expecting a function");
+		return false;
+	}
+
+	if (!args[3]->IsUndefined() && (!args[3]->IsFunction()))
+	{
+		Nan::ThrowTypeError("Wrong fourth argument. Expecting a function");
 		return false;
 	}
 
@@ -203,7 +241,7 @@ double getNumberOrDefault(v8::Handle<v8::Object> object, const char* name, doubl
 
 v8::Handle<v8::Object> getObjectFromArguments(const Nan::FunctionCallbackInfo<v8::Value>& args, int index)
 {
-	if (args.Length() - 1 >= index)
+	if (args.Length() - 1 >= index && !args[index]->IsUndefined())
 		return v8::Handle<v8::Object>::Cast(args[index]);
 
 	return Nan::New<v8::Object>();
@@ -211,7 +249,7 @@ v8::Handle<v8::Object> getObjectFromArguments(const Nan::FunctionCallbackInfo<v8
 
 v8::Handle<v8::Array> getArrayFromArguments(const Nan::FunctionCallbackInfo<v8::Value>& args, int index)
 {
-	if (args.Length() - 1 >= index)
+	if (args.Length() - 1 >= index && !args[index]->IsUndefined())
 		return v8::Handle<v8::Array>::Cast(args[index]);
 
 	return Nan::New<v8::Array>();
@@ -220,9 +258,7 @@ v8::Handle<v8::Array> getArrayFromArguments(const Nan::FunctionCallbackInfo<v8::
 
 NAN_METHOD(findStrategy)
 {
-	v8::Local<v8::Promise::Resolver> resolver = v8::Promise::Resolver::New(info.GetIsolate());
-
-	if (findStrategyValidateInput(info, resolver))
+	if (findStrategyValidateInput(info))
 	{
 		std::vector<Candlestick> candlesticks;
 		std::vector<std::string> indicatorNames;
@@ -292,23 +328,30 @@ NAN_METHOD(findStrategy)
 		baton->leafIndicatorMutationProbability = leafIndicatorMutationProbability;
 		baton->crossoverProbability = crossoverProbability;
 
-		if (info.Length() > 2)
+		Nan::Callback* callback = nullptr;
+
+		if (info.Length() > 2 && !info[2]->IsUndefined())
 		{
-			baton->callback = new Nan::Callback(info[2].As<v8::Function>());
+			baton->progress = new Nan::Callback(info[2].As<v8::Function>());
 		}
 		else
 		{
-			baton->callback = nullptr;
+			baton->progress = nullptr;
 		}
 
-		Nan::Callback* callback = new Nan::Callback();
+		if (info.Length() > 3 && !info[3]->IsUndefined())
+		{
+			callback = new Nan::Callback(info[3].As<v8::Function>());
+		}
+
+		if (callback == nullptr) {
+			callback = new Nan::Callback();
+		}
 
 		auto worker = new FindStrategyAsyncWorker(callback, baton);
-		worker->SaveToPersistent("resolver", resolver);
 
 		Nan::AsyncQueueWorker(worker);
 	}
 
-	//Return a promise
-	info.GetReturnValue().Set(resolver->GetPromise());
+	info.GetReturnValue().Set(Nan::Undefined());
 } // findStrategy
