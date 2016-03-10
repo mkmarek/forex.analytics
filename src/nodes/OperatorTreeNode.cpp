@@ -1,3 +1,5 @@
+#include "nan.h"
+
 #include "../../include/stdafx.h"
 #include "../../include/nodes/OperatorTreeNode.h"
 
@@ -52,24 +54,22 @@ TreeNode* OperatorTreeNode::Copy() const
 }
 
 void OperatorTreeNode::ToJs(
-  v8::Local<v8::Object>& object,
-  v8::Isolate* isolate) const {
+  v8::Local<v8::Object>& object) const {
 
-  object->Set(v8::String::NewFromUtf8(isolate, "operator"),
-    v8::String::NewFromUtf8(isolate, OperatorStrings[this->value]));
+  object->Set(Nan::New<v8::String>("operator").ToLocalChecked(),
+    Nan::New<v8::String>(OperatorStrings[this->value]).ToLocalChecked());
 
-  TreeNode::ToJs(object, isolate);
+  TreeNode::ToJs(object);
 }
 
 TreeNode* OperatorTreeNode::FromJs(
-  const v8::Local<v8::Object>& input,
-  v8::Isolate* isolate) {
+  const v8::Local<v8::Object>& input) {
 
-    if (!input->Has(v8::String::NewFromUtf8(isolate, "operator")))
+    if (!input->Has(Nan::New<v8::String>("operator").ToLocalChecked()))
       return nullptr;
 
     std::string oper =
-      std::string(*v8::String::Utf8Value(input->Get(v8::String::NewFromUtf8(isolate, "operator"))
+      std::string(*v8::String::Utf8Value(input->Get(Nan::New<v8::String>("operator").ToLocalChecked())
         ->ToString()));
 
     Operator op = Operator::And;

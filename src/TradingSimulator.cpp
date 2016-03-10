@@ -1,4 +1,7 @@
+#include "nan.h"
+
 #include "../include/TradingSimulator.h"
+
 
 double Trade::getRevenue() const {
     return this->Buy ?
@@ -8,18 +11,17 @@ double Trade::getRevenue() const {
 
 void Trade::ToArray(
     const std::vector<Trade>& trades,
-    v8::Local<v8::Array>& output,
-    v8::Isolate * isolate) {
+    v8::Local<v8::Array>& output) {
 
     size_t tradeCount = trades.size();
 
     for (size_t i = 0; i < tradeCount; i++) {
 
-        v8::Local<v8::Object> object = v8::Object::New(isolate);
+        v8::Local<v8::Object> object = Nan::New<v8::Object>();
 
         const Trade& trade = trades[i];
 
-        Trade::ToObject(trade, object, isolate);
+        Trade::ToObject(trade, object);
 
         output->Set(static_cast<uint32_t>(i), object);
     }
@@ -27,37 +29,34 @@ void Trade::ToArray(
 
 void Trade::ToObject(
     const Trade& trade,
-    v8::Local<v8::Object>& output,
-    v8::Isolate * isolate) {
+    v8::Local<v8::Object>& output) {
 
-    output->Set(v8::String::NewFromUtf8(isolate, "Buy"),
-                v8::Boolean::New(isolate, trade.Buy));
+    output->Set(Nan::New<v8::String>("Buy").ToLocalChecked(),
+                Nan::New<v8::Boolean>(trade.Buy));
 
-    output->Set(v8::String::NewFromUtf8(isolate, "Revenue"),
-                v8::Number::New(isolate, trade.getRevenue()));
+    output->Set(Nan::New<v8::String>("Revenue").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.getRevenue()));
 
-    output->Set(v8::String::NewFromUtf8(isolate, "MaximumLoss"),
-                v8::Number::New(isolate, trade.MaximumLoss));
+    output->Set(Nan::New<v8::String>("MaximumLoss").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.MaximumLoss));
 
-    output->Set(v8::String::NewFromUtf8(isolate, "MaximumProffit"),
-                v8::Number::New(isolate, trade.MaximumProffit));
+    output->Set(Nan::New<v8::String>("MaximumProffit").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.MaximumProffit));
 
-    v8::Local<v8::Object> start = v8::Object::New(isolate);
-    v8::Local<v8::Object> end = v8::Object::New(isolate);
+	v8::Local<v8::Object> start = Nan::New<v8::Object>();
+    v8::Local<v8::Object> end = Nan::New<v8::Object>();
 
-    Candlestick::ToObject(*trade.Start, start, isolate);
-    Candlestick::ToObject(*trade.End, end, isolate);
+    Candlestick::ToObject(*trade.Start, start);
+    Candlestick::ToObject(*trade.End, end);
 
-    output->Set(v8::String::NewFromUtf8(isolate, "start"),
-                start);
-    output->Set(v8::String::NewFromUtf8(isolate, "end"),
-                end);
-
+    output->Set(Nan::New<v8::String>("start").ToLocalChecked() ,start);
+    output->Set(Nan::New<v8::String>("end").ToLocalChecked(), end);
 }
 
 std::vector<Trade>* TradingSimulator::Simulate(
     const BinaryTreeChromosome * chromosome,
     const std::vector<IndicatorTuple>* data) const {
+
     bool shouldBuy, shouldSell, buy = false;
     std::vector<Trade>* trades = new std::vector<Trade>();
 

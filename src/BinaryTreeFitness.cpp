@@ -52,5 +52,5 @@ void BinaryTreeFitness::CalculateFitness(
             threads[i]->join();
             delete threads[i];
         }
-    }
+   }
 } // BinaryTreeFitness::CalculateFitness

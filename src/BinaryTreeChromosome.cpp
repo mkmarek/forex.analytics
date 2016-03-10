@@ -1,8 +1,8 @@
+#include "nan.h"
+
 #include "../include/BinaryTreeChromosome.h"
 #include "../include/nodes/OperatorTreeNode.h"
 #include "../include/nodes/IndicatorTreeNode.h"
-
-#include <iostream>
 
 BinaryTreeChromosome::BinaryTreeChromosome() {
 	this->buy = nullptr;
@@ -79,19 +79,24 @@ bool BinaryTreeChromosome::operator>(
 
 BinaryTreeChromosome * BinaryTreeChromosome::FromJs(
 	const std::vector<BaseIndicator *>& indicators,
-	const v8::Local<v8::Object>& input,
-	v8::Isolate * isolate) {
+	const v8::Local<v8::Object>& input) {
+
 	BinaryTreeChromosome * chromosome = new BinaryTreeChromosome();
 
 	chromosome->_indicators = indicators;
 
 	v8::Handle<v8::Object> buy = v8::Handle<v8::Object>::Cast(
-		input->Get(v8::String::NewFromUtf8(isolate, "buy")));
-	v8::Handle<v8::Object> sell = v8::Handle<v8::Object>::Cast(
-		input->Get(v8::String::NewFromUtf8(isolate, "sell")));
+		Nan::Get(input, Nan::New<v8::String>("buy")
+			.ToLocalChecked())
+		.ToLocalChecked());
 
-	chromosome->buy = TreeNode::FromJs(indicators, buy, isolate);
-	chromosome->sell = TreeNode::FromJs(indicators, sell, isolate);
+	v8::Handle<v8::Object> sell = v8::Handle<v8::Object>::Cast(
+		Nan::Get(input, Nan::New<v8::String>("sell")
+			.ToLocalChecked())
+		.ToLocalChecked());
+
+	chromosome->buy = TreeNode::FromJs(indicators, buy);
+	chromosome->sell = TreeNode::FromJs(indicators, sell);
 
 	return chromosome;
 }

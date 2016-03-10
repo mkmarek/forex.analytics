@@ -1,4 +1,4 @@
-var analytics = require('../build/Release/analytics.node');
+var analytics = require('../index.js');
 var fs = require('fs');
 
 /**

@@ -32,11 +32,9 @@ virtual void GenerateRandomNumbericValue();
 virtual void Copy(TreeNode * destination) const override;
 virtual TreeNode * Copy() const override;
 
-virtual void ToJs(v8::Local<v8::Object>& object, v8::Isolate * isolate)
-const override;
+virtual void ToJs(v8::Local<v8::Object>& object) const override;
 
 static TreeNode * FromJs(
     const std::vector<BaseIndicator *>& indicators,
-    const v8::Local<v8::Object>& input,
-    v8::Isolate * isolate);
+    const v8::Local<v8::Object>& input);
 };

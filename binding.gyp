@@ -34,7 +34,6 @@
         }],
       ],
       "sources": [
-        "src/analytics.cpp",
         "src/BinaryTreeFitness.cpp",
         "src/BinaryTreeChromosome.cpp",
         "src/BinaryTreeGeneticAlgo.cpp",
@@ -58,6 +57,13 @@
         "src/nodes/TreeNode.cpp",
 
         "src/utils/HeapSort.cpp",
+
+        "src/export.cpp",
+        "src/functions/convertOHLC.cpp",
+        "src/functions/findStrategy.cpp",
+        "src/functions/getIndicatorData.cpp",
+        "src/functions/getMarketStatus.cpp",
+        "src/functions/getTrades.cpp",
       ]
     }
   ]

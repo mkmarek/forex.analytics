@@ -98,13 +98,11 @@ bool operator >(const BinaryTreeChromosome * chromosome) const;
  *
  * @param  indicators vector of indicators used for this chromosome
  * @param  input      The input v8 object
- * @param  isolate    Pointer to a v8 isolate instance
  * @return            Pointer to an instance of a BinaryTreeChromosome
  *                    This is created dynamically. So  it has to be deleted as
  *                    well
  */
 static BinaryTreeChromosome * FromJs(
     const std::vector<BaseIndicator *>& indicators,
-    const v8::Local<v8::Object>& input,
-    v8::Isolate * isolate);
+    const v8::Local<v8::Object>& input);
 };

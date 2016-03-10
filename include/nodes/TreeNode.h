@@ -18,10 +18,9 @@ virtual void GenerateRandomValue() = 0;
 virtual void Copy(TreeNode *) const = 0;
 virtual TreeNode * Copy() const = 0;
 
-virtual void ToJs(v8::Local<v8::Object>& object, v8::Isolate * isolate) const = 0;
+virtual void ToJs(v8::Local<v8::Object>& object) const = 0;
 
 static TreeNode * FromJs(
     const std::vector<BaseIndicator *>& indicators,
-    const v8::Local<v8::Object>& input,
-    v8::Isolate * isolate);
+    const v8::Local<v8::Object>& input);
 };

@@ -1,3 +1,5 @@
+#include "nan.h"
+
 #include "../../../include/indicators/factories/IndicatorFactory.h"
 
 std::map<std::string, factoryMethod>* IndicatorFactory::registeredNames = nullptr;
@@ -62,4 +64,25 @@ bool IndicatorFactory::Register(const std::string name, const factoryMethod crea
 		IndicatorFactory::registeredNames->insert(std::pair<std::string, factoryMethod>(name.c_str(), createMethod));
 
 	return registeredPair.second;
+}
+
+std::vector<BaseIndicator *> IndicatorFactory::CreateFromArray(v8::Handle<v8::Array> array)
+{
+	unsigned indicatorCount = array->Length();
+	std::vector<std::string> indicatorNames;
+
+	for (unsigned i = 0; i < indicatorCount; i++)
+	{
+		indicatorNames.push_back(std::string(*v8::String::Utf8Value(array->Get(i)->ToString())));
+	}
+
+	std::vector<BaseIndicator *> indicators;
+
+	for (unsigned long i = 0; i < indicatorNames.size(); i++)
+	{
+		BaseIndicator* indicator = IndicatorFactory::Create(indicatorNames[i]);
+		indicators.push_back(indicator);
+	}
+
+	return indicators;
 }

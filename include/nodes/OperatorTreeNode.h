@@ -25,8 +25,7 @@ virtual void GenerateRandomValue() override;
 virtual void Copy(TreeNode * destination) const override;
 virtual TreeNode * Copy() const override;
 
-virtual void ToJs(v8::Local<v8::Object>& object, v8::Isolate * isolate)
-const override;
+virtual void ToJs(v8::Local<v8::Object>& object) const override;
 
-static TreeNode * FromJs(const v8::Local<v8::Object>& input, v8::Isolate * isolate);
+static TreeNode * FromJs(const v8::Local<v8::Object>& input);
 };

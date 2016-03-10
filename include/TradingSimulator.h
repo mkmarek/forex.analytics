@@ -48,23 +48,19 @@ public:
 	 * Converts a vector of trades to a v8 array
 	 * @param trades  The input vector if trades
 	 * @param output  The output v8 array
-	 * @param isolate The isolate object
 	 */
 	static void ToArray(
 		const std::vector<Trade>& trades,
-		v8::Local<v8::Array>& output,
-		v8::Isolate* isolate);
+		v8::Local<v8::Array>& output);
 
 	/**
 	 * Converts an input trade to a v8 object
 	 * @param trade   The input trade object
 	 * @param output  The output v8 object
-	 * @param isolate The isolate object
 	 */
 	static void ToObject(
 		const Trade& trade,
-		v8::Local<v8::Object>& output,
-		v8::Isolate* isolate);
+		v8::Local<v8::Object>& output);
 };
 
 
