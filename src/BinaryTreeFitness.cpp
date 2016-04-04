@@ -12,7 +12,7 @@ BinaryTreeFitness::BinaryTreeFitness(
 inline void multithreadedCalculation(
     unsigned begin,
     unsigned size,
-    const std::vector<BinaryTreeChromosome *>* chromosomes,
+    const std::vector<BinaryTreeChromosome*>* chromosomes,
     const std::vector<IndicatorTuple>* dataSet,
     FitnessFunction eval) {
 
@@ -22,7 +22,7 @@ inline void multithreadedCalculation(
 }
 
 void BinaryTreeFitness::CalculateFitness(
-    const std::vector<BinaryTreeChromosome *>* chromosomes) const {
+    const std::vector<BinaryTreeChromosome*>* chromosomes) const {
     unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
 	size_t count = chromosomes->size();
 

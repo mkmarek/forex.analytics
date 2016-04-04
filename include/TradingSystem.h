@@ -54,7 +54,7 @@ public:
  * @param  crossoverProbability             Probability for performing crossover
  *                                           (0.0 - 1.0)
  *
- * @param  outFitness                       The maximum fitness value achieved
+ * @param  update							Lambda expression called during progress update
 
  * @return                                  The best fit chromosome found
  */

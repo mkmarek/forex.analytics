@@ -4,6 +4,10 @@
 class TreeNode
 {
 public:
+	static std::random_device r;
+
+	std::mt19937 engine;
+
 TreeNode();
 virtual ~TreeNode();
 

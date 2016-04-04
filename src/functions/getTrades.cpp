@@ -3,6 +3,7 @@
 #include "../../include/TradingSystem.h"
 #include "../../include/TradingSimulator.h"
 #include "../../include/indicators/Indicator.h"
+#include "../../include/indicators/factories/IndicatorFactory.h"
 
 NAN_METHOD(getTrades)
 {
@@ -35,8 +36,7 @@ NAN_METHOD(getTrades)
 
 	Candlestick::CreateFromArray(candlesticks, candlestickArray);
 
-	std::vector<BaseIndicator *> indicators = IndicatorFactory::CreateFromArray(v8::Handle<v8::Array>::Cast(
-		configuration->Get(Nan::New<v8::String>("indicators").ToLocalChecked())));
+	std::vector<BaseIndicator *> indicators = IndicatorFactory::CreateAll();
 
 	v8::Handle<v8::Object> strategy = v8::Handle<v8::Object>::Cast(
 		configuration->Get(Nan::New<v8::String>("strategy").ToLocalChecked()));

@@ -11,6 +11,9 @@ IndicatorTreeNode::IndicatorTreeNode(
   const std::vector<BaseIndicator*>& indicators) : _indicators(indicators), value(0)
 {
 	this->sign = Sign::Lt;
+
+	sign_uniform_dist = std::uniform_int_distribution<int>(0, 1);
+	indicator_uniform_dist = std::uniform_int_distribution<int>(0, indicators.size() - 1);
 }
 
 IndicatorTreeNode::~IndicatorTreeNode() {
@@ -20,8 +23,15 @@ bool IndicatorTreeNode::Evaluate(
   const std::map<std::string, IndicatorData>& data) const {
   for (unsigned long i = 0; i < this->_indicators.size(); i++) {
     if (this->_indicators[i]->Name == this->indicator) {
-      return this->_indicators[i]->Evaluate(this->sign,
-        this->value, data.at(this->indicator));
+
+		switch (sign) {
+		case Sign::Gt:
+			return (value / 1000) > data.at(this->indicator).data;
+		case Sign::Lt:
+			return value / 1000 < data.at(this->indicator).data;
+		}
+
+		return false;
     }
   }
 
@@ -35,12 +45,11 @@ void IndicatorTreeNode::GenerateRandomValue() {
 
 void IndicatorTreeNode::GenerateRandomSign() {
     Sign old = this->sign;
-    while (this->sign == old)
-      this->sign = static_cast<Sign>(rand() % 2);
+    this->sign = static_cast<Sign>(sign_uniform_dist(engine));
 }
 
 void IndicatorTreeNode::GenerateRandomIndicator() {
-  this->indicator = this->_indicators[rand() % this->_indicators.size()]
+  this->indicator = this->_indicators[indicator_uniform_dist(engine)]
     ->Name.c_str();
 
   this->GenerateRandomNumbericValue();

@@ -2,6 +2,7 @@
 #include <node.h>
 #include "../../include/TradingSystem.h"
 #include "../../include/indicators/Indicator.h"
+#include "../../include/indicators/factories/IndicatorFactory.h"
 
 const int DEFAULT_POPULATION_COUNT = 100;
 const int DEFAULT_GENERATION_COUNT = 100;
@@ -35,23 +36,16 @@ struct FindStrategyBaton
 
 struct StrategyUpdateBaton
 {
-	BinaryTreeChromosome* chromosome;
 	double fitness;
 	int generation;
+	BinaryTreeChromosome* chromosome;
 };
 
 template <typename T>
 static void chromosomeToObject(T* baton, v8::Local<v8::Object>& strategy)
 {
-	v8::Local<v8::Object> buy = Nan::New<v8::Object>();
-	v8::Local<v8::Object> sell = Nan::New<v8::Object>();
-
-	baton->chromosome->buy->ToJs(buy);
-	baton->chromosome->sell->ToJs(sell);
-
 	strategy = Nan::New<v8::Object>();
-	strategy->Set(Nan::New<v8::String>("buy").ToLocalChecked(), buy);
-	strategy->Set(Nan::New<v8::String>("sell").ToLocalChecked(), sell);
+	baton->chromosome->ToJs(strategy);
 }
 
 class FindStrategyAsyncWorker : public Nan::AsyncProgressWorker
@@ -77,8 +71,8 @@ public:
 			{
 				StrategyUpdateBaton updateBaton;
 				updateBaton.fitness = fitness;
-				updateBaton.chromosome = chromosome;
 				updateBaton.generation = generation;
+				updateBaton.chromosome = chromosome;
 
 				pp->Send(reinterpret_cast<const char*>(&updateBaton), sizeof(StrategyUpdateBaton));
 			}
@@ -106,7 +100,7 @@ public:
 		}
 	}
 
-	virtual void HandleOKCallback() override {
+	void HandleOKCallback() override {
 		Nan::HandleScope scope;
 
 		if (baton->chromosome == nullptr) {
@@ -143,7 +137,7 @@ public:
 		delete baton;
 	}
 
-	virtual void HandleErrorCallback() override {
+	void HandleErrorCallback() override {
 		Nan::HandleScope scope;
 
 		v8::Handle<v8::Value> argv[] =

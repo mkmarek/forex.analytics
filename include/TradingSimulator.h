@@ -38,6 +38,8 @@ public:
 	 */
 	double MaximumProffit;
 
+	bool ProffitBeforeLoss;
+
 	/**
 	 * Gets the total revenue of the performed trade
 	 * @return double value in pips specifying the trade's revenue

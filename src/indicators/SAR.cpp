@@ -1,6 +1,7 @@
 #include "../../include/indicators/Indicator.h"
+#include "../../include/indicators/factories/IndicatorFactory.h"
 
-INDICATOR(SAR)(const std::vector<Candlestick>& candlesticks, int* startIndex)
+INDICATOR(SAR)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
 

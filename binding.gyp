@@ -47,6 +47,8 @@
         "src/indicators/SAR.cpp",
         "src/indicators/SMA.cpp",
         "src/indicators/Stochastic.cpp",
+        "src/indicators/ATR.cpp",
+        "src/indicators/BOP.cpp",
 
         "src/indicators/factories/IndicatorFactory.cpp",
 

@@ -12,13 +12,15 @@ var indicators = [
   'MACD_Histogram',
   'Momentum',
   'RSI',
+  'BOP',
+  'ATR',
   'SAR',
   'SMA15_SMA50',
-  'Stochastic_K',
-  'Stochastic_D'
+  'Stochastic'
 ];
 
-var stopLoss = 0.0015;
+var stopLoss = 0.0030;
+var takeProffit = 0.0030;
 
 /**
  * Training csv file worth of 6 month data
@@ -55,29 +57,91 @@ function loadCsvData(inputFile, callback) {
     })
     .on('end', function() {
       var candlesticks = parseCsv(csvContent);
+      candlesticks.sort(function(a, b) {
+        a.time - b.time;
+      });
 
       callback(candlesticks);
     });
 }
 
 /**
+ * Calculates and presents potential revenue of a given strategy for given
+ * candlesticks
+ */
+function calculateTrades(candlesticks, strategy) {
+  var trades = getTrades(candlesticks, strategy);
+
+  var totalRevenue = 0;
+  var totalNoOfTrades = 0;
+  var numberOfProffitTrades = 0;
+  var numberOfLossTrades = 0;
+  var maximumLoss = 0;
+
+  for (var i = 0; i < trades.length; i++) {
+
+    var revenue;
+
+    if (stopLoss < trades[i].MaximumLoss) {
+      revenue = -stopLoss;
+    } else if (takeProffit < trades[i].MaximumProffit) {
+      revenue = takeProffit;
+    } else {
+      revenue = trades[i].Revenue || 0;
+    }
+
+    if (revenue > 0) numberOfProffitTrades++;
+    else numberOfLossTrades++;
+
+    totalNoOfTrades++;
+
+    totalRevenue += revenue;
+
+    if (maximumLoss < trades[i].MaximumLoss)
+      maximumLoss = trades[i].MaximumLoss;
+  }
+
+  console.log('Total theoretical revenue is: ' + totalRevenue + ' PIPS');
+  console.log('Maximum theoretical loss is: ' + maximumLoss + ' PIPS');
+  console.log('Total number of proffitable trades is: ' + numberOfProffitTrades);
+  console.log('Total number of loss trades is: ' + numberOfLossTrades);
+  console.log('Total number of trades is: ' + totalNoOfTrades);
+}
+
+/**
  * Returns an object representing buy/sell strategy
  * @param  {Object} candlesticks Input candlesticks for strategy estimation
  */
-function createStrategy(candlesticks) {
+function createStrategy(candlesticks, testing30MinuteCandlesticks) {
+
+  var lastFitness = -1;
+
   return analytics.findStrategy(candlesticks, {
-    populationCount: 400,
-    generationCount: 300,
+    populationCount: 3000,
+    generationCount: 100,
     selectionAmount: 10,
-    leafValueMutationProbability: 0.5,
-    leafSignMutationProbability: 0.3,
-    logicalNodeMutationProbability: 0.3,
+    leafValueMutationProbability: 0.3,
+    leafSignMutationProbability: 0.1,
+    logicalNodeMutationProbability: 0.05,
     leafIndicatorMutationProbability: 0.2,
     crossoverProbability: 0.03,
     indicators: indicators
 
   }, function(strategy, fitness, generation) {
+
+    console.log('---------------------------------');
     console.log('Fitness: ' + fitness + '; Generation: ' + generation);
+
+    if (lastFitness == fitness)
+      return;
+
+    lastFitness = fitness;
+
+    console.log('-----------Training--------------');
+    calculateTrades(candlesticks, strategy);
+
+    console.log('-----------Testing--------------');
+    calculateTrades(testing30MinuteCandlesticks, strategy);
   });
 }
 
@@ -88,8 +152,7 @@ function createStrategy(candlesticks) {
  */
 function getTrades(candlesticks, strategy) {
   return analytics.getTrades(candlesticks, {
-    strategy: strategy,
-    indicators: indicators
+    strategy: strategy
   });
 }
 
@@ -107,13 +170,15 @@ function parseCsv(text) {
     var date = new Date(parts[0] + ' ' + parts[1]);
     var time = (date.getTime()) / 1000;
 
-    candlesticks.push({
-      open: parts[2],
-      high: parts[3],
-      low: parts[4],
-      close: parts[5],
-      time: time
-    });
+    if (time) {
+      candlesticks.push({
+        open: parts[2],
+        high: parts[3],
+        low: parts[4],
+        close: parts[5],
+        time: time
+      });
+    }
   }
 
   return candlesticks;
@@ -123,61 +188,25 @@ function parseCsv(text) {
  * Converts candlesticks from lower timeframe to 30 minute timeframe
  */
 function convertTo30MOhlc(candlesticks) {
-  return analytics.convertOHLC(candlesticks, 1800);
+  var n = analytics.convertOHLC(candlesticks, 1800);
+  return n;
 }
 
 console.log('Loading training data set');
-loadCsvData(trainingFile, function(candlesticks) {
+loadCsvData(testingFile, function(testingCandlesticks) {
+  loadCsvData(trainingFile, function(candlesticks) {
 
-  var thirtyMinuteCandlesticks = convertTo30MOhlc(candlesticks);
+    var thirtyMinuteCandlesticks = convertTo30MOhlc(candlesticks);
+    var testing30MinuteCandlesticks = convertTo30MOhlc(testingCandlesticks);
 
-  console.log('Calculating strategy')
-  createStrategy(thirtyMinuteCandlesticks)
-  .then(function(strategy) {
-    console.log('------------Strategy-------------');
-    console.log(JSON.stringify(strategy));
-    console.log('---------------------------------');
+    console.log('Calculating strategy')
+    createStrategy(thirtyMinuteCandlesticks, testing30MinuteCandlesticks)
+      .then(function(strategy) {
+        console.log('------------Strategy-------------');
+        console.log(JSON.stringify(strategy));
+        console.log('---------------------------------');
 
-    console.log('Loading testing data set');
-    loadCsvData(testingFile, function(candlesticks) {
-
-      var thirtyMinuteCandlesticks = convertTo30MOhlc(candlesticks);
-
-      console.log('Calculating trades')
-      var trades = getTrades(thirtyMinuteCandlesticks, strategy);
-
-      var totalRevenue = 0;
-      var totalNoOfTrades = 0;
-      var numberOfProffitTrades = 0;
-      var numberOfLossTrades = 0;
-      var maximumLoss = 0;
-
-      for (var i = 0; i < trades.length; i++) {
-
-        var revenue;
-
-        if (stopLoss < trades[i].MaximumLoss) {
-          revenue = -stopLoss;
-        } else {
-          revenue = trades[i].Revenue || 0;
-        }
-
-        if (revenue > 0) numberOfProffitTrades++;
-        else numberOfLossTrades++;
-
-        totalNoOfTrades++;
-
-        totalRevenue += revenue;
-
-        if (maximumLoss < trades[i].MaximumLoss)
-          maximumLoss = trades[i].MaximumLoss;
-      }
-
-      console.log('Total theoretical revenue is: ' + totalRevenue + ' PIPS');
-      console.log('Maximum theoretical loss is: ' + maximumLoss + ' PIPS');
-      console.log('Total number of proffitable trades is: ' + numberOfProffitTrades);
-      console.log('Total number of loss trades is: ' + numberOfLossTrades);
-      console.log('Total number of trades is: ' + totalNoOfTrades);
-    });
+        calculateTrades(testing30MinuteCandlesticks, strategy);
+      });
   });
 });

@@ -3,14 +3,16 @@
 #include "../stdafx.h"
 #include "TreeNode.h"
 
-enum Operator {  And = 0,  Or = 1 };
-static const char * OperatorStrings[] = { "And", "Or" };
+enum Operator {  And = 0,  Or = 1, Xor = 2};
+static const char * OperatorStrings[] = { "And", "Or", "Xor"};
 
 class OperatorTreeNode :
     public TreeNode
 {
 public:
 Operator value;
+
+std::uniform_int_distribution<int> operator_dist;
 
 OperatorTreeNode();
 ~OperatorTreeNode();

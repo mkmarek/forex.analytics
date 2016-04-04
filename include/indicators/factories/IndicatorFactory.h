@@ -39,7 +39,7 @@ static std::vector<BaseIndicator *> CreateFromArray(v8::Handle<v8::Array> array)
  * @param  createMethod The indicator factory method
  * @return              Status whether indicator was successfully registered
  */
-static bool Register(const std::string name, const factoryMethod createMethod);\
+static bool Register(const std::string name, const factoryMethod createMethod);
 
 protected:
 

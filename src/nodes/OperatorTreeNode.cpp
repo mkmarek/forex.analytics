@@ -5,6 +5,7 @@
 
 OperatorTreeNode::OperatorTreeNode(): value()
 {
+	operator_dist = std::uniform_int_distribution<int>(0, 1);
 }
 
 
@@ -23,6 +24,11 @@ bool OperatorTreeNode::Evaluate(
     case Operator::Or:
       return   this->left->Evaluate(data) ||
               this->right->Evaluate(data);
+
+	case Operator::Xor:
+		return   this->left->Evaluate(data) !=
+			this->right->Evaluate(data);
+
   }
 
   return false;
@@ -30,7 +36,7 @@ bool OperatorTreeNode::Evaluate(
 
 void OperatorTreeNode::GenerateRandomValue()
 {
-  this->value = static_cast<Operator>(rand() % 2);
+  this->value = static_cast<Operator>(operator_dist(engine));
 }
 
 void OperatorTreeNode::Copy(TreeNode* destination) const
@@ -74,7 +80,7 @@ TreeNode* OperatorTreeNode::FromJs(
 
     Operator op = Operator::And;
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 3; i++) {
       if (oper == OperatorStrings[i]) {
         op = static_cast<Operator>(i);
       }

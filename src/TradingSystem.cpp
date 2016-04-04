@@ -5,6 +5,7 @@
 #include <time.h>
 #include <chrono>
 #include <thread>
+#include "../include/utils/HeapSort.h"
 
 /**
  * Fitness fucntion for chromosome quality evaluation
@@ -19,29 +20,42 @@ inline double EvaluateFitness(FitnessFunctionArgs args)
 	std::vector<Trade>* trades = simulator.Simulate(args.chromosome, args.data);
 
 	double points = 0;
+	int positive = 0;
+	int negative = 0;
 
 	for (unsigned long i = 0; i < trades->size(); i++)
 	{
 		double revenue = trades->at(i).getRevenue();
 		int duration = trades->at(i).End->Time - trades->at(i).Start->Time;
 
-		if (trades->at(i).MaximumLoss > 0.0010) {
-			points -= 0.0010 / duration;
-		}
-		else if (revenue > 0.0005) //shorter trades than one day
-		{ //at least 5 pips.
-			//TODO: This is currently tailored for EUR/USD - will need to be changed
-			points += revenue / duration;
-		}
-		else
-		{
-			points -= abs(revenue) / duration;
+	
+		if (duration != 0) {
+
+			if (trades->at(i).MaximumProffit > trades->at(i).MaximumLoss * 4 && trades->at(i).ProffitBeforeLoss)
+			{
+				//TODO: This is currently tailored for EUR/USD - will need to be changed
+				points += trades->at(i).MaximumProffit / duration * 900 * 10;
+				positive++;
+			}
+			else if (trades->at(i).MaximumProffit > trades->at(i).MaximumLoss * 4)
+			{
+				//TODO: This is currently tailored for EUR/USD - will need to be changed
+				points += trades->at(i).MaximumProffit / duration * 900;
+				positive++;
+			}
+			else
+			{
+				points -= trades->at(i).MaximumLoss;
+				negative++;
+			}
 		}
 	}
 
+	points *= trades->size();
+
 	delete trades;
 
-	return points;
+	return double(positive - negative) * abs(points);
 }
 
 BinaryTreeChromosome* TradingSystem::PerformAnalysis(
@@ -85,17 +99,17 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 
 	for (unsigned i = 0; i < populationCount; i++)
 	{
-		front_buffer[i]->GenerateTree(4, indicators);
-		back_buffer[i]->GenerateTree(4, indicators);
+		front_buffer[i]->GenerateTree(3, indicators);
+		back_buffer[i]->GenerateTree(3, indicators);
 
 		front_buffer[i]->setFitness(0);
 		back_buffer[i]->setFitness(0);
 	}
 	HeapSort heapSort;
 
-	std::vector<BinaryTreeChromosome *>* p_front_buffer = &front_buffer;
-	std::vector<BinaryTreeChromosome *>* p_back_buffer = &back_buffer;
-	std::vector<BinaryTreeChromosome *>* tmp2;
+	std::vector<BinaryTreeChromosome*>* p_front_buffer = &front_buffer;
+	std::vector<BinaryTreeChromosome*>* p_back_buffer = &back_buffer;
+	std::vector<BinaryTreeChromosome*>* tmp2;
 
 	for (unsigned y = 0; y < generationCount; y++)
 	{
@@ -105,7 +119,7 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 		p_front_buffer = p_back_buffer;
 		p_back_buffer = tmp2;
 
-		heapSort.Sort(*p_back_buffer, populationCount);
+		heapSort.Sort(p_back_buffer, populationCount);
 
 		update(p_back_buffer->at(populationCount - 1)->getFitness(), p_back_buffer->at(populationCount - 1), y + 1 /* Start with 1 */);
 
@@ -115,7 +129,7 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 
 	fitness.CalculateFitness(p_front_buffer);
 
-	heapSort.Sort(*p_front_buffer, populationCount);
+	heapSort.Sort(p_front_buffer, populationCount);
 
 	BinaryTreeChromosome* bestFit = new BinaryTreeChromosome(p_front_buffer->at(populationCount - 1));
 
@@ -208,7 +222,7 @@ std::vector<IndicatorTuple> TradingSystem::EvaluateCandlesticks(
 
 		int indicatorStart = 0;
 
-		const std::vector<double>& indicatorValue = indicator->GetIndicatorData(candlesticks, &indicatorStart);
+		const std::vector<double>& indicatorValue = indicator->GetIndicatorData(&candlesticks, &indicatorStart);
 
 		if (indicatorValue.size() == 0) {
 			throw "Unsufficient amount of input candlesticks";
@@ -228,20 +242,13 @@ std::vector<IndicatorTuple> TradingSystem::EvaluateCandlesticks(
 		if (indicatorStart > start) start = indicatorStart;
 	}
 
-	for (auto iter = indicatorValues.begin(); iter != indicatorValues.end(); ++iter)
-	{
-		auto collection = iter->second;
-		// delete unnecessary values
-		collection.erase(collection.begin(), collection.begin() + (start - collection.begin()->offset));
-	}
-
 	for (unsigned long y = 0; y < candlesticks.size() - start; y++)
 	{
 		std::map<std::string, IndicatorData> element;
 
 		for (auto iter = indicatorValues.begin(); iter != indicatorValues.end(); ++iter)
 		{
-			element.insert(std::make_pair(iter->first, iter->second[y]));
+			element.insert(std::make_pair(iter->first, iter->second[y + start - iter->second.begin()->offset]));
 		}
 
 		values.push_back(element);

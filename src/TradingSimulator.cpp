@@ -1,6 +1,7 @@
 #include "nan.h"
 
 #include "../include/TradingSimulator.h"
+#include <iostream>
 
 
 double Trade::getRevenue() const {
@@ -57,84 +58,113 @@ std::vector<Trade>* TradingSimulator::Simulate(
     const BinaryTreeChromosome * chromosome,
     const std::vector<IndicatorTuple>* data) const {
 
-    bool shouldBuy, shouldSell, buy = false;
     std::vector<Trade>* trades = new std::vector<Trade>();
 
     const Candlestick * start = nullptr;
+
+	int proffitIndex = 0;
+	int lossIndex = 0;
     double maximumPotentialLoss = 0.0;
     double maximumPotentialProffit = 0.0;
 
-    for (unsigned long i = 0; i < data->size(); i++) {
-        shouldBuy = chromosome->buy->Evaluate(data->at(i).Element);
-        shouldSell = chromosome->sell->Evaluate(data->at(i).Element);
 
-        if (shouldBuy == true && shouldSell == false) {
-            // if we're in trade and we're selling then close it and start a new one
-            if (start != nullptr && buy == false) {
+		bool shouldBuy, shouldSell, buy = false;
 
-                Trade t;
-                t.Start = start;
-                t.End = &data->at(i).Element.begin()->second.candlestick;
-                t.Buy = buy;
-                t.MaximumProffit = maximumPotentialProffit;
-                t.MaximumLoss = maximumPotentialLoss;
+		for (unsigned long i = 0; i < data->size(); i++) {
+			shouldBuy = chromosome->shouldBuy(data->at(i).Element);
+			shouldSell = chromosome->shouldSell(data->at(i).Element);
 
-                trades->push_back(t);
+			if (shouldBuy == true && shouldSell == false) {
+				// if we're in trade and we're selling then close it and start a new one
+				if (start != nullptr && buy == false) {
 
-                start = &(data->at(i).Element.begin()->second.candlestick);
+					Trade t;
+					t.Start = start;
+					t.End = &data->at(i).Element.begin()->second.candlestick;
+					t.Buy = buy;
+					t.MaximumProffit = maximumPotentialProffit;
+					t.MaximumLoss = maximumPotentialLoss;
+					t.ProffitBeforeLoss = proffitIndex < lossIndex;
 
-                maximumPotentialLoss = 0.0;
-                maximumPotentialProffit = 0.0;
-            }
-            // or if not in trade at all
-            else if (start == nullptr) {
-                start = &(data->at(i).Element.begin()->second.candlestick);
-            }
+					trades->push_back(t);
 
-            double intermediateProffit = data->at(i).Element.begin()->second.candlestick.High - start->Close;
-            double intermediateLoss = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
+					start = &(data->at(i).Element.begin()->second.candlestick);
 
-            if (intermediateLoss > maximumPotentialLoss)
-              maximumPotentialLoss = intermediateLoss;
+					proffitIndex = 0;
+					lossIndex = 0;
+					maximumPotentialLoss = 0.0;
+					maximumPotentialProffit = 0.0;
+				}
+				// or if not in trade at all
+				else if (start == nullptr) {
+					start = &(data->at(i).Element.begin()->second.candlestick);
+				}
 
-            if (intermediateProffit > maximumPotentialProffit)
-              maximumPotentialProffit = intermediateProffit;
 
-            buy = true;
-        }
+				buy = true;
+			}
 
-        if (shouldBuy == false && shouldSell == true) {
-            if (start != nullptr && buy == true) {
+			if (buy == true && start != nullptr)
+			{
+				double intermediateProffit = data->at(i).Element.begin()->second.candlestick.High - start->Close;
+				double intermediateLoss = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
 
-                Trade t;
-                t.Start = start;
-                t.End = &data->at(i).Element.begin()->second.candlestick;
-                t.Buy = buy;
-                t.MaximumProffit = maximumPotentialProffit;
-                t.MaximumLoss = maximumPotentialLoss;
+				if (intermediateLoss > maximumPotentialLoss) {
+					maximumPotentialLoss = intermediateLoss;
+					lossIndex = i;
+				}
 
-                trades->push_back(t);
+				if (intermediateProffit > maximumPotentialProffit) {
+					maximumPotentialProffit = intermediateProffit;
+					proffitIndex = i;
+				}
+			}
 
-                start = &(data->at(i).Element.begin()->second.candlestick);
+			if (shouldBuy == false && shouldSell == true) {
+				if (start != nullptr && buy == true) {
 
-                maximumPotentialLoss = 0.0;
-                maximumPotentialProffit = 0.0;
+					Trade t;
+					t.Start = start;
+					t.End = &data->at(i).Element.begin()->second.candlestick;
+					t.Buy = buy;
+					t.MaximumProffit = maximumPotentialProffit;
+					t.MaximumLoss = maximumPotentialLoss;
+					t.ProffitBeforeLoss = proffitIndex < lossIndex;
 
-            } else if (start == nullptr) {
-                start = &(data->at(i).Element.begin()->second.candlestick);
-            }
+					trades->push_back(t);
 
-            double intermediateProffit = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
-            double intermediateLoss = data->at(i).Element.begin()->second.candlestick.High - start->Close;
+					start = &(data->at(i).Element.begin()->second.candlestick);
 
-            if (intermediateLoss > maximumPotentialLoss)
-              maximumPotentialLoss = intermediateLoss;
+					proffitIndex = 0;
+					lossIndex = 0;
+					maximumPotentialLoss = 0.0;
+					maximumPotentialProffit = 0.0;
 
-            if (intermediateProffit > maximumPotentialProffit)
-              maximumPotentialProffit = intermediateProffit;
+				}
+				else if (start == nullptr) {
+					start = &(data->at(i).Element.begin()->second.candlestick);
+				}
 
-            buy = false;
-        }
+				buy = false;
+			}
+
+			if (buy == false && start != nullptr)
+			{
+
+				double intermediateProffit = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
+				double intermediateLoss = data->at(i).Element.begin()->second.candlestick.High - start->Close;
+
+				if (intermediateLoss > maximumPotentialLoss) {
+					maximumPotentialLoss = intermediateLoss;
+					lossIndex = i;
+				}
+
+				if (intermediateProffit > maximumPotentialProffit) {
+					maximumPotentialProffit = intermediateProffit;
+					proffitIndex = i;
+				}
+			}
+
     }
 
     return trades;

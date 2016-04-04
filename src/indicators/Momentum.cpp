@@ -1,6 +1,7 @@
 #include "../../include/indicators/Indicator.h"
+#include "../../include/indicators/factories/IndicatorFactory.h"
 
-INDICATOR(Momentum)(const std::vector<Candlestick>& candlesticks, int* startIndex)
+INDICATOR(Momentum)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
 
@@ -8,7 +9,7 @@ INDICATOR(Momentum)(const std::vector<Candlestick>& candlesticks, int* startInde
   int outNbElement;
   int optInTimePeriod = 14;
 
-  if (candlesticks.size() < optInTimePeriod) {
+  if (candlesticks->size() < optInTimePeriod) {
     return indicatorData;
   }
 

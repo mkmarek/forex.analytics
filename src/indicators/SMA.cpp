@@ -1,6 +1,7 @@
 #include "../../include/indicators/Indicator.h"
+#include "../../include/indicators/factories/IndicatorFactory.h"
 
-INDICATOR(SMA15_SMA50)(const std::vector<Candlestick>& candlesticks, int* startIndex)
+INDICATOR(SMA15_SMA50)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
 
@@ -9,8 +10,8 @@ INDICATOR(SMA15_SMA50)(const std::vector<Candlestick>& candlesticks, int* startI
   int optInTimePeriod1 = 15;
   int optInTimePeriod2 = 50;
 
-  if (candlesticks.size() < optInTimePeriod1 ||
-      candlesticks.size() < optInTimePeriod2) {
+  if (candlesticks->size() < optInTimePeriod1 ||
+      candlesticks->size() < optInTimePeriod2) {
         return indicatorData;
   }
 

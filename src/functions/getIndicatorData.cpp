@@ -2,6 +2,7 @@
 #include <node.h>
 #include "../../include/TradingSystem.h"
 #include "../../include/indicators/Indicator.h"
+#include "../../include/indicators/factories/IndicatorFactory.h"
 
 /**
 * Returns an array of objects with indicator values
