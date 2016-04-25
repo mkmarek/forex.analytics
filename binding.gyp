@@ -49,6 +49,7 @@
         "src/indicators/Stochastic.cpp",
         "src/indicators/ATR.cpp",
         "src/indicators/BOP.cpp",
+        "src/indicators/BaseIndicator.cpp",
 
         "src/indicators/factories/IndicatorFactory.cpp",
 
