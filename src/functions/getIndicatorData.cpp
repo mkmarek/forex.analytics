@@ -32,7 +32,7 @@ NAN_METHOD(getIndicatorData)
 
 	v8::Handle<v8::Array> indicatorArray = v8::Handle<v8::Array>::Cast(
 		configuration->Get(Nan::New<v8::String>("indicators").ToLocalChecked()));
-	
+
 	std::vector<BaseIndicator *> indicators = IndicatorFactory::CreateFromArray(indicatorArray);
 
 	v8::Local<v8::Array> output = Nan::New<v8::Array>();
@@ -51,7 +51,7 @@ NAN_METHOD(getIndicatorData)
 				Nan::New<v8::Number>(iterator->second.data));
 
 			obj->Set(Nan::New<v8::String>("timestamp").ToLocalChecked(),
-				Nan::New<v8::Integer>(iterator->second.candlestick.Time));
+				Nan::New<v8::Number>(iterator->second.candlestick.Time));
 		}
 
 		output->Set(i, obj);

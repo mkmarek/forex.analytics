@@ -172,7 +172,7 @@ public:
 		{
 			strategy,
 			v8::Handle<v8::Value>(Nan::New<v8::Number>(updateBaton->fitness)),
-			v8::Handle<v8::Value>(Nan::New<v8::Int32>(updateBaton->generation)),
+			v8::Handle<v8::Value>(Nan::New<v8::Number>(updateBaton->generation)),
 		};
 
 		this->baton->progress->Call(3, argv);

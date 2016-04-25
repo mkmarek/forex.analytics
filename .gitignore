@@ -274,3 +274,4 @@ build
 *.o
 *.tlog
 *.lib
+*.a

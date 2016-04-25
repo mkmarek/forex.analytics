@@ -18,10 +18,8 @@
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
             },
             "libraries" : [
-              "../lib/ta-lib/lib/libta_abstract_csr.a",
               "../lib/ta-lib/lib/libta_common_csr.a",
               "../lib/ta-lib/lib/libta_func_csr.a",
-              "../lib/ta-lib/lib/libta_libc_csr.a"
             ],
         }],
         [ 'OS=="win"', {

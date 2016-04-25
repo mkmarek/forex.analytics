@@ -11,13 +11,6 @@ void Candlestick::CreateFromArray(
 
 	for (unsigned i = 0; i < candlestickCount; i++) {
 
-		//All members of an array have to be integers
-		/*if (!input->Get(i)->IsObject()) {
-			Nan::ThrowTypeError(v8::String::Concat(Nan::New<v8::String>("Wrong type of member in array on index: ").ToLocalChecked(),
-				Nan::New<v8::Int32>(i)->ToString()));
-			return;
-		}*/
-
 		v8::Local<v8::Object> candlestick = v8::Local<v8::Object>::Cast(input->Get(i));
 
 		Candlestick c = CreateFromObject(candlestick);
@@ -71,5 +64,5 @@ void Candlestick::ToObject(
 	output->Set(Nan::New<v8::String>("close").ToLocalChecked(),
 		Nan::New<v8::Number>(candlestick.Close));
 	output->Set(Nan::New<v8::String>("time").ToLocalChecked(),
-		Nan::New<v8::Int32>(candlestick.Time));
+		Nan::New<v8::Number>(candlestick.Time));
 }
