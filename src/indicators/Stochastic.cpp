@@ -11,12 +11,15 @@ INDICATOR(Stochastic)(const std::vector<Candlestick>* candlesticks, int* startIn
   int optInSlowKPeriod = 5;
   int optInSlowDPeriod = 3;
 
-  if (candlesticks->size() < optInFastKPeriod ||
-      candlesticks->size() < optInSlowDPeriod ||
-      candlesticks->size() < optInSlowKPeriod) {
+  unsigned int lookback = TA_STOCH_Lookback(optInFastKPeriod,
+    optInSlowKPeriod,
+    TA_MAType::TA_MAType_SMA,
+    optInSlowDPeriod,
+    TA_MAType::TA_MAType_SMA);
 
-        return indicatorData;
-  }
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
 
   //Initialize all required parameters
   this->PrepareParameters(candlesticks);

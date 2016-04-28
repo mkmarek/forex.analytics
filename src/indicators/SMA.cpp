@@ -10,10 +10,17 @@ INDICATOR(SMA15_SMA50)(const std::vector<Candlestick>* candlesticks, int* startI
   int optInTimePeriod1 = 15;
   int optInTimePeriod2 = 50;
 
-  if (candlesticks->size() < optInTimePeriod1 ||
-      candlesticks->size() < optInTimePeriod2) {
-        return indicatorData;
-  }
+  unsigned int lookback = TA_SMA_Lookback(optInTimePeriod1);
+
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
+
+  lookback = TA_SMA_Lookback(optInTimePeriod2);
+
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
 
   //Initialize all required parameters
   this->PrepareParameters(candlesticks);

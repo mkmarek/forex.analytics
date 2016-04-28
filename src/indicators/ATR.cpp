@@ -9,7 +9,9 @@ INDICATOR(ATR)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 	int outNbElement;
 	int optInTimePeriod = 14;
 
-	if (candlesticks->size() < optInTimePeriod) {
+	unsigned int lookback = TA_ATR_Lookback(optInTimePeriod);
+
+  if (candlesticks->size() <= lookback) {
 		return indicatorData;
 	}
 

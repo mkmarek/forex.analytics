@@ -44,7 +44,6 @@ void IndicatorTreeNode::GenerateRandomValue() {
 }
 
 void IndicatorTreeNode::GenerateRandomSign() {
-    Sign old = this->sign;
     this->sign = static_cast<Sign>(sign_uniform_dist(engine));
 }
 

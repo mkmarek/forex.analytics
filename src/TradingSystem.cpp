@@ -25,10 +25,9 @@ inline double EvaluateFitness(FitnessFunctionArgs args)
 
 	for (unsigned long i = 0; i < trades->size(); i++)
 	{
-		double revenue = trades->at(i).getRevenue();
 		int duration = trades->at(i).End->Time - trades->at(i).Start->Time;
 
-	
+
 		if (duration != 0) {
 
 			if (trades->at(i).MaximumProffit > trades->at(i).MaximumLoss * 4 && trades->at(i).ProffitBeforeLoss)
@@ -55,7 +54,7 @@ inline double EvaluateFitness(FitnessFunctionArgs args)
 
 	delete trades;
 
-	return double(positive - negative) * abs(points);
+	return double(positive - negative) * std::abs(points);
 }
 
 BinaryTreeChromosome* TradingSystem::PerformAnalysis(

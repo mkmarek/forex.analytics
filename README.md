@@ -1,11 +1,9 @@
 Forex analytics native module for Node.js
 ==========
-[![Build Status](https://travis-ci.org/mkmarek/neuralnet.svg?branch=master)](https://travis-ci.org/mkmarek/neuralnet)
+[![Build Status](https://travis-ci.org/mkmarek/forex.analytics.svg?branch=master)](https://travis-ci.org/mkmarek/forex.analytics)
 
 Node.js native library performing technical analysis over an OHLC dataset with use of genetic algorithm. The result of technical analysis are two binary trees describing strategies for buy and sell signals
 which produced profit in a certain period of time specified by the input OHLC data set.
-
-The Node.js version used is 5.3.0.
 
 Running the source
 ---------------

@@ -9,9 +9,12 @@ INDICATOR(CCI)(const std::vector<Candlestick>* candlesticks, int* startIndex)
   int outNbElement;
   int optInTimePeriod = 14;
 
-  if (candlesticks->size() < optInTimePeriod) {
-    return indicatorData;
-  }
+  unsigned int lookback = TA_CCI_Lookback(optInTimePeriod);
+
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
+
 
   //Initialize all required parameters
   this->PrepareParameters(candlesticks);

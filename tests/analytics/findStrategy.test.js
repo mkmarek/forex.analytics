@@ -13,10 +13,11 @@ var indicators = [
   'MACD_Histogram',
   'Momentum',
   'RSI',
+  'BOP',
+  'ATR',
   'SAR',
   'SMA15_SMA50',
-  'Stochastic_K',
-  'Stochastic_D'
+  'Stochastic'
 ];
 
 describe('analytics', function() {
