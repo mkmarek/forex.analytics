@@ -1,6 +1,7 @@
 Forex analytics native module for Node.js
 ==========
 [![Build Status](https://travis-ci.org/mkmarek/forex.analytics.svg?branch=master)](https://travis-ci.org/mkmarek/forex.analytics)
+[![npm version](https://badge.fury.io/js/forex.analytics.svg)](https://badge.fury.io/js/forex.analytics)
 
 Node.js native library performing technical analysis over an OHLC dataset with use of genetic algorithm. The result of technical analysis are two binary trees describing strategies for buy and sell signals
 which produced profit in a certain period of time specified by the input OHLC data set.
