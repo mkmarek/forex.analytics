@@ -9,6 +9,14 @@
       'cflags!': [ '-fno-exceptions' ],
       'cflags_cc!': [ '-fno-exceptions' ],
       'conditions': [
+        ['OS=="linux"', {
+          "libraries" : [
+            "../lib/ta-lib/lib/libta_abstract_csr.a",
+            "../lib/ta-lib/lib/libta_func_csr.a",
+            "../lib/ta-lib/lib/libta_common_csr.a",
+            "../lib/ta-lib/lib/libta_libc_csr.a",
+          ]
+        }],
         [ 'OS=="mac"', {
 
           'xcode_settings': {
@@ -22,7 +30,7 @@
               "../lib/ta-lib/lib/libta_func_csr.a",
               "../lib/ta-lib/lib/libta_common_csr.a",
               "../lib/ta-lib/lib/libta_libc_csr.a",
-            ],
+            ]
         }],
         [ 'OS=="win"', {
             "libraries" : [
@@ -30,7 +38,7 @@
               "../lib/ta-lib/lib/ta_common_csr.lib",
               "../lib/ta-lib/lib/ta_func_csr.lib",
               "../lib/ta-lib/lib/ta_libc_csr.lib"
-            ],
+            ]
         }],
       ],
       "sources": [
