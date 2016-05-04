@@ -20,6 +20,7 @@ struct FindStrategyBaton
 	Nan::Callback* progress;
 
 	BinaryTreeChromosome* chromosome;
+	BinaryTreeChromosome* startingChromosome;
 	std::vector<Candlestick> candlesticks;
 	std::vector<BaseIndicator*> indicators;
 	const char* errorMessage;
@@ -91,6 +92,7 @@ public:
 				baton->logicalNodeMutationProbability,
 				baton->leafIndicatorMutationProbability,
 				baton->crossoverProbability,
+				baton->startingChromosome,
 				update);
 		}
 		catch (const char* error)
@@ -133,6 +135,9 @@ public:
 
 		if (baton->chromosome != nullptr)
 			delete baton->chromosome;
+
+		if (baton->startingChromosome != nullptr)
+			delete baton->startingChromosome;
 
 		delete baton;
 	}
@@ -321,6 +326,19 @@ NAN_METHOD(findStrategy)
 		baton->logicalNodeMutationProbability = logicalNodeMutationProbability;
 		baton->leafIndicatorMutationProbability = leafIndicatorMutationProbability;
 		baton->crossoverProbability = crossoverProbability;
+
+		baton->startingChromosome = nullptr;
+
+		if (configuration->Has(Nan::New<v8::String>("strategy").ToLocalChecked()))
+		{
+			v8::Handle<v8::Object> strategy = v8::Handle<v8::Object>::Cast(
+				configuration->Get(Nan::New<v8::String>("strategy").ToLocalChecked()));
+
+			BinaryTreeChromosome* chromosome = BinaryTreeChromosome::FromJs(
+				IndicatorFactory::CreateAll(), strategy);
+
+			baton->startingChromosome = chromosome;
+		}
 
 		Nan::Callback* callback = nullptr;
 

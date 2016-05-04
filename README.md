@@ -87,14 +87,16 @@ Finds the optimal strategy for a certain period defined by the *candlesticks* ar
  logicalNodeMutationProbability: 0.3,
  leafIndicatorMutationProbability: 0.2,
  crossoverProbability: 0.03,
- indicators: [ 'CCI', 'MACD', 'RSI', 'SMA15_SMA50' ]
+ indicators: [ 'CCI', 'MACD', 'RSI', 'SMA15_SMA50' ],
+ strategy: { buy : {...}, sell : {...} }
 }
 ```
 
 **progressCallback** parameter has to be a function. This function is invoked when one generation passes.
  It contains three arguments: **strategy, fitness, generation**. Where **strategy** stands for the currently best
  strategy found in a certain generation. **Fitness** is a fitness value of a certain strategy calculated by fitness evaluation algorithm.
- **Generation** is the number of generation which was just completed.
+ **Generation** is the number of generation which was just completed. The **strategy** parameter describes which
+ strategy it shall use as a referential. This parameter is not mandatory.
 
  ```javascript
  function progressCallback(strategy, fitness, generation) {

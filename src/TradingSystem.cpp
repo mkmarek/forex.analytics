@@ -28,7 +28,7 @@ inline double EvaluateFitness(FitnessFunctionArgs args)
 		double revenue = trades->at(i).getRevenue();
 		int duration = trades->at(i).End->Time - trades->at(i).Start->Time;
 
-	
+
 		if (duration != 0) {
 
 			if (trades->at(i).MaximumProffit > trades->at(i).MaximumLoss * 4 && trades->at(i).ProffitBeforeLoss)
@@ -69,6 +69,7 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 	double logicalNodeMutationProbability,
 	double leafIndicatorMutationProbability,
 	double crossoverProbability,
+	BinaryTreeChromosome* chromosomeToStartWith,
 	std::function<void(double fitness, BinaryTreeChromosome * chromosome, int generation)> update
 )
 {
@@ -79,12 +80,6 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 	// Initialization
 	std::vector<BinaryTreeChromosome *> front_buffer = std::vector<BinaryTreeChromosome *>();
 	std::vector<BinaryTreeChromosome *> back_buffer = std::vector<BinaryTreeChromosome *>();
-
-	for (unsigned y = 0; y < populationCount; y++)
-	{
-		front_buffer.push_back(new BinaryTreeChromosome());
-		back_buffer.push_back(new BinaryTreeChromosome());
-	}
 
 	BinaryTreeFitness fitness(&(EvaluateFitness), &dataSet);
 
@@ -97,6 +92,13 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 		crossoverProbability
 	);
 
+	for (unsigned y = 0; y < populationCount; y++)
+	{
+		front_buffer.push_back(new BinaryTreeChromosome());
+		back_buffer.push_back(new BinaryTreeChromosome());
+	}
+
+
 	for (unsigned i = 0; i < populationCount; i++)
 	{
 		front_buffer[i]->GenerateTree(3, indicators);
@@ -105,6 +107,35 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 		front_buffer[i]->setFitness(0);
 		back_buffer[i]->setFitness(0);
 	}
+
+ 	if (chromosomeToStartWith != nullptr)
+	{
+		for (unsigned i = 0; i < populationCount; i++)
+		{
+			chromosomeToStartWith->copyTo(front_buffer[i]);
+			chromosomeToStartWith->copyTo(back_buffer[i]);
+
+			if (i != 0) {
+				front_buffer[i]->Mutate(
+					leafValueMutationProbability,
+					leafSignMutationProbability,
+					logicalNodeMutationProbability,
+					crossoverProbability,
+					leafIndicatorMutationProbability
+				);
+
+				back_buffer[i]->Mutate(
+					leafValueMutationProbability,
+					leafSignMutationProbability,
+					logicalNodeMutationProbability,
+					crossoverProbability,
+					leafIndicatorMutationProbability
+				);
+			}
+		}
+	}
+
+
 	HeapSort heapSort;
 
 	std::vector<BinaryTreeChromosome*>* p_front_buffer = &front_buffer;
