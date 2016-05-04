@@ -11,6 +11,12 @@ INDICATOR(BOP)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 	//Initialize all required parameters
 	this->PrepareParameters(candlesticks);
 
+	unsigned int lookback = TA_BOP_Lookback();
+
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
+
 	//Perform the CCI calculation
 	TA_BOP(
 		this->startIdx,

@@ -13,6 +13,12 @@ INDICATOR(SAR)(const std::vector<Candlestick>* candlesticks, int* startIndex)
   double optInMaximum = 0.2;
   double optInAcceleration = 0.02;
 
+  unsigned int lookback = TA_SAR_Lookback(optInAcceleration, optInMaximum);
+
+  if (candlesticks->size() < lookback) {
+		return indicatorData;
+	}
+
   TA_SAR(
     this->startIdx,
     this->endIdx,

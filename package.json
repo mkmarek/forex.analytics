@@ -1,6 +1,6 @@
 {
   "name": "forex.analytics",
-  "version": "0.0.11",
+  "version": "0.0.13",
   "description": "Performs data anaylsis on a set of candlesticks and using available indicators constructs the best strategy which worked on a certain period.",
   "main": "index.js",
   "engines": {

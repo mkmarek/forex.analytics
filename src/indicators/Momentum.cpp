@@ -9,9 +9,11 @@ INDICATOR(Momentum)(const std::vector<Candlestick>* candlesticks, int* startInde
   int outNbElement;
   int optInTimePeriod = 14;
 
-  if (candlesticks->size() < optInTimePeriod) {
-    return indicatorData;
-  }
+  unsigned int lookback = TA_MOM_Lookback(optInTimePeriod);
+
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
 
   //Initialize all required parameters
   this->PrepareParameters(candlesticks);
