@@ -126,7 +126,6 @@ function createStrategy(candlesticks, testing30MinuteCandlesticks) {
     leafIndicatorMutationProbability: 0.2,
     crossoverProbability: 0.03,
     indicators: indicators
-
   }, function(strategy, fitness, generation) {
 
     console.log('---------------------------------');

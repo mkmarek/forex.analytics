@@ -69,6 +69,7 @@ BinaryTreeChromosome* PerformAnalysis(
         double logicalNodeMutationProbability,
         double leafIndicatorMutationProbability,
         double crossoverProbability,
+        BinaryTreeChromosome* chromosomeToStartWith,
         std::function<void(double fitness, BinaryTreeChromosome * chromosome, int generation)> update);
 
 /**
