@@ -328,7 +328,8 @@ Can output:
       "Buy":true,
       "Revenue":0.0031200000000000117,
       "MaximumLoss":0.0023200000000000998,
-      "MaximumProffit":0.005009999999999959,
+      "MaximumProfit":0.005009999999999959,
+      "ProfitBeforeLoss" : true,
       "start":{
          "open":1.10604,
          "low":1.10586,
@@ -347,14 +348,15 @@ Can output:
 ]
 ```
 
-Where **buy** stands for whether the specific trade was made on a proffit from a
+Where **buy** stands for whether the specific trade was made on a profit from a
 rising or falling market.
 
 **Revenue** is the the revenue that was obtained at the end of a trade.
 
-**MaximumLoss** desribes how far the price movement went against the wanted direction.
-**MaximumProffit** desribes how far the price movement went on the wanted direction.
-**start** and **end** ar the candlesticks describing the boundaries of a given trade.
+**MaximumLoss** describes how far the price movement went against the wanted direction.
+**MaximumProfit** describes how far the price movement went on the wanted direction.
+**start** and **end** are the candlesticks describing the boundaries of a given trade.
+**ProfitBeforeLoss** indicates whether the maximum profit was reached before maximum loss
 
 Roadmap
 ---------------

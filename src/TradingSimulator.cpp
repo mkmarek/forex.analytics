@@ -41,8 +41,11 @@ void Trade::ToObject(
     output->Set(Nan::New<v8::String>("MaximumLoss").ToLocalChecked(),
                 Nan::New<v8::Number>(trade.MaximumLoss));
 
-    output->Set(Nan::New<v8::String>("MaximumProffit").ToLocalChecked(),
-                Nan::New<v8::Number>(trade.MaximumProffit));
+    output->Set(Nan::New<v8::String>("MaximumProfit").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.MaximumProfit));
+
+    output->Set(Nan::New<v8::String>("ProfitBeforeLoss").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.ProfitBeforeLoss));
 
 	v8::Local<v8::Object> start = Nan::New<v8::Object>();
     v8::Local<v8::Object> end = Nan::New<v8::Object>();
@@ -62,10 +65,10 @@ std::vector<Trade>* TradingSimulator::Simulate(
 
     const Candlestick * start = nullptr;
 
-	int proffitIndex = 0;
+	int profitIndex = 0;
 	int lossIndex = 0;
     double maximumPotentialLoss = 0.0;
-    double maximumPotentialProffit = 0.0;
+    double maximumPotentialProfit = 0.0;
 
 
 		bool shouldBuy, shouldSell, buy = false;
@@ -82,18 +85,18 @@ std::vector<Trade>* TradingSimulator::Simulate(
 					t.Start = start;
 					t.End = &data->at(i).Element.begin()->second.candlestick;
 					t.Buy = buy;
-					t.MaximumProffit = maximumPotentialProffit;
+					t.MaximumProfit = maximumPotentialProfit;
 					t.MaximumLoss = maximumPotentialLoss;
-					t.ProffitBeforeLoss = proffitIndex < lossIndex;
+					t.ProfitBeforeLoss = profitIndex < lossIndex;
 
 					trades->push_back(t);
 
 					start = &(data->at(i).Element.begin()->second.candlestick);
 
-					proffitIndex = 0;
+					profitIndex = 0;
 					lossIndex = 0;
 					maximumPotentialLoss = 0.0;
-					maximumPotentialProffit = 0.0;
+					maximumPotentialProfit = 0.0;
 				}
 				// or if not in trade at all
 				else if (start == nullptr) {
@@ -106,7 +109,7 @@ std::vector<Trade>* TradingSimulator::Simulate(
 
 			if (buy == true && start != nullptr)
 			{
-				double intermediateProffit = data->at(i).Element.begin()->second.candlestick.High - start->Close;
+				double intermediateProfit = data->at(i).Element.begin()->second.candlestick.High - start->Close;
 				double intermediateLoss = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
 
 				if (intermediateLoss > maximumPotentialLoss) {
@@ -114,9 +117,9 @@ std::vector<Trade>* TradingSimulator::Simulate(
 					lossIndex = i;
 				}
 
-				if (intermediateProffit > maximumPotentialProffit) {
-					maximumPotentialProffit = intermediateProffit;
-					proffitIndex = i;
+				if (intermediateProfit > maximumPotentialProfit) {
+					maximumPotentialProfit = intermediateProfit;
+					profitIndex = i;
 				}
 			}
 
@@ -127,18 +130,18 @@ std::vector<Trade>* TradingSimulator::Simulate(
 					t.Start = start;
 					t.End = &data->at(i).Element.begin()->second.candlestick;
 					t.Buy = buy;
-					t.MaximumProffit = maximumPotentialProffit;
+					t.MaximumProfit = maximumPotentialProfit;
 					t.MaximumLoss = maximumPotentialLoss;
-					t.ProffitBeforeLoss = proffitIndex < lossIndex;
+					t.ProfitBeforeLoss = profitIndex < lossIndex;
 
 					trades->push_back(t);
 
 					start = &(data->at(i).Element.begin()->second.candlestick);
 
-					proffitIndex = 0;
+					profitIndex = 0;
 					lossIndex = 0;
 					maximumPotentialLoss = 0.0;
-					maximumPotentialProffit = 0.0;
+					maximumPotentialProfit = 0.0;
 
 				}
 				else if (start == nullptr) {
@@ -151,7 +154,7 @@ std::vector<Trade>* TradingSimulator::Simulate(
 			if (buy == false && start != nullptr)
 			{
 
-				double intermediateProffit = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
+				double intermediateProfit = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
 				double intermediateLoss = data->at(i).Element.begin()->second.candlestick.High - start->Close;
 
 				if (intermediateLoss > maximumPotentialLoss) {
@@ -159,9 +162,9 @@ std::vector<Trade>* TradingSimulator::Simulate(
 					lossIndex = i;
 				}
 
-				if (intermediateProffit > maximumPotentialProffit) {
-					maximumPotentialProffit = intermediateProffit;
-					proffitIndex = i;
+				if (intermediateProfit > maximumPotentialProfit) {
+					maximumPotentialProfit = intermediateProfit;
+					profitIndex = i;
 				}
 			}
 

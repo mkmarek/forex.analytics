@@ -20,7 +20,7 @@ var indicators = [
 ];
 
 var stopLoss = 0.0030;
-var takeProffit = 0.0030;
+var takeProfit = 0.0030;
 
 /**
  * Training csv file worth of 6 month data
@@ -74,7 +74,7 @@ function calculateTrades(candlesticks, strategy) {
 
   var totalRevenue = 0;
   var totalNoOfTrades = 0;
-  var numberOfProffitTrades = 0;
+  var numberOfProfitTrades = 0;
   var numberOfLossTrades = 0;
   var maximumLoss = 0;
 
@@ -84,13 +84,13 @@ function calculateTrades(candlesticks, strategy) {
 
     if (stopLoss < trades[i].MaximumLoss) {
       revenue = -stopLoss;
-    } else if (takeProffit < trades[i].MaximumProffit) {
-      revenue = takeProffit;
+    } else if (takeProfit < trades[i].MaximumProfit  && (!trades[i].ProfitBeforeLoss || takeProfit > trades[i].MaximumProfit)) {
+      revenue = takeProfit;
     } else {
       revenue = trades[i].Revenue || 0;
     }
 
-    if (revenue > 0) numberOfProffitTrades++;
+    if (revenue > 0) numberOfProfitTrades++;
     else numberOfLossTrades++;
 
     totalNoOfTrades++;
@@ -103,7 +103,7 @@ function calculateTrades(candlesticks, strategy) {
 
   console.log('Total theoretical revenue is: ' + totalRevenue + ' PIPS');
   console.log('Maximum theoretical loss is: ' + maximumLoss + ' PIPS');
-  console.log('Total number of proffitable trades is: ' + numberOfProffitTrades);
+  console.log('Total number of Profitable trades is: ' + numberOfProfitTrades);
   console.log('Total number of loss trades is: ' + numberOfLossTrades);
   console.log('Total number of trades is: ' + totalNoOfTrades);
 }

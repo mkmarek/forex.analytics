@@ -34,11 +34,11 @@ public:
 	double MaximumLoss;
 
 	/**
-	 * Defines the maximum proffit during the trade
+	 * Defines the maximum profit during the trade
 	 */
-	double MaximumProffit;
+	double MaximumProfit;
 
-	bool ProffitBeforeLoss;
+	bool ProfitBeforeLoss;
 
 	/**
 	 * Gets the total revenue of the performed trade
