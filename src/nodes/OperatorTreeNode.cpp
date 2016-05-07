@@ -1,8 +1,11 @@
+#include "nan.h"
+
 #include "../../include/stdafx.h"
 #include "../../include/nodes/OperatorTreeNode.h"
 
 OperatorTreeNode::OperatorTreeNode(): value()
 {
+	operator_dist = std::uniform_int_distribution<int>(0, 1);
 }
 
 
@@ -21,6 +24,11 @@ bool OperatorTreeNode::Evaluate(
     case Operator::Or:
       return   this->left->Evaluate(data) ||
               this->right->Evaluate(data);
+
+	case Operator::Xor:
+		return   this->left->Evaluate(data) !=
+			this->right->Evaluate(data);
+
   }
 
   return false;
@@ -28,7 +36,7 @@ bool OperatorTreeNode::Evaluate(
 
 void OperatorTreeNode::GenerateRandomValue()
 {
-  this->value = static_cast<Operator>(rand() % 2);
+  this->value = static_cast<Operator>(operator_dist(engine));
 }
 
 void OperatorTreeNode::Copy(TreeNode* destination) const
@@ -52,29 +60,27 @@ TreeNode* OperatorTreeNode::Copy() const
 }
 
 void OperatorTreeNode::ToJs(
-  v8::Local<v8::Object>& object,
-  v8::Isolate* isolate) const {
+  v8::Local<v8::Object>& object) const {
 
-  object->Set(v8::String::NewFromUtf8(isolate, "operator"),
-    v8::String::NewFromUtf8(isolate, OperatorStrings[this->value]));
+  object->Set(Nan::New<v8::String>("operator").ToLocalChecked(),
+    Nan::New<v8::String>(OperatorStrings[this->value]).ToLocalChecked());
 
-  TreeNode::ToJs(object, isolate);
+  TreeNode::ToJs(object);
 }
 
 TreeNode* OperatorTreeNode::FromJs(
-  const v8::Local<v8::Object>& input,
-  v8::Isolate* isolate) {
+  const v8::Local<v8::Object>& input) {
 
-    if (!input->Has(v8::String::NewFromUtf8(isolate, "operator")))
+    if (!input->Has(Nan::New<v8::String>("operator").ToLocalChecked()))
       return nullptr;
 
     std::string oper =
-      std::string(*v8::String::Utf8Value(input->Get(v8::String::NewFromUtf8(isolate, "operator"))
+      std::string(*v8::String::Utf8Value(input->Get(Nan::New<v8::String>("operator").ToLocalChecked())
         ->ToString()));
 
     Operator op = Operator::And;
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 3; i++) {
       if (oper == OperatorStrings[i]) {
         op = static_cast<Operator>(i);
       }

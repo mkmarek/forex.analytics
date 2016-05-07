@@ -1,6 +1,7 @@
 #include "../../include/indicators/Indicator.h"
+#include "../../include/indicators/factories/IndicatorFactory.h"
 
-INDICATOR(CCI)(const std::vector<Candlestick>& candlesticks, int* startIndex)
+INDICATOR(CCI)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
 
@@ -8,9 +9,12 @@ INDICATOR(CCI)(const std::vector<Candlestick>& candlesticks, int* startIndex)
   int outNbElement;
   int optInTimePeriod = 14;
 
-  if (candlesticks.size() < optInTimePeriod) {
-    return indicatorData;
-  }
+  unsigned int lookback = TA_CCI_Lookback(optInTimePeriod);
+
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
+
 
   //Initialize all required parameters
   this->PrepareParameters(candlesticks);
@@ -36,6 +40,7 @@ INDICATOR(CCI)(const std::vector<Candlestick>& candlesticks, int* startIndex)
   *startIndex = outBeginIdx;
 
   //Cleanup all required parameters
+
   this->Clean();
 
   return indicatorData;

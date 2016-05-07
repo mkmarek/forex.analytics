@@ -29,12 +29,17 @@ static BaseIndicator * Create(const std::string name);
 static std::vector<BaseIndicator *> CreateAll();
 
 /**
+* Returns a vector containing indicators based on teh names passed in the v8 array
+*/
+static std::vector<BaseIndicator *> CreateFromArray(v8::Handle<v8::Array> array);
+
+/**
  * Registers an indicator factory method used for creating new indicators
  * @param  name         Name of the registered indicator
  * @param  createMethod The indicator factory method
  * @return              Status whether indicator was successfully registered
  */
-static bool Register(const std::string name, const factoryMethod createMethod);\
+static bool Register(const std::string name, const factoryMethod createMethod);
 
 protected:
 

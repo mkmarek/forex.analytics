@@ -4,9 +4,11 @@
 #include "../stdafx.h"
 #include "../models/Candlestick.h"
 #include "./BaseIndicator.h"
-#include "./factories/IndicatorFactory.h"
 
 #include <iostream>
+#include <ctime>
+
+
 
 #define INDICATOR(m) \
 \
@@ -16,7 +18,7 @@ public: \
     double Value; \
 \
 protected: \
-    std::vector<double> _GetIndicatorData(const std::vector<Candlestick>&candlesticks, int * startIndex) override; \
+    std::vector<double> _GetIndicatorData(const std::vector<Candlestick>* candlesticks, int * startIndex) override; \
     }; \
 \
     bool m ## Indicator = IndicatorFactory::Register(#m, &Indicator<m>::Create); \
@@ -35,8 +37,9 @@ static BaseIndicator * Create() {
     return (BaseIndicator *)(new T());
 }
 
-virtual std::vector<double> GetIndicatorData(const std::vector<Candlestick>& candlesticks, int * startIndex) override {
-    std::vector<double> v = this->_GetIndicatorData(candlesticks, startIndex);
+virtual std::vector<double> GetIndicatorData(const std::vector<Candlestick>* candlesticks, int * startIndex) override {
+
+	std::vector<double> v = this->_GetIndicatorData(candlesticks, startIndex);
 
     for (unsigned long i = 0; i < v.size(); i++) {
         if (this->MIN_VALUE > v[i])
@@ -46,34 +49,19 @@ virtual std::vector<double> GetIndicatorData(const std::vector<Candlestick>& can
             this->MAX_VALUE = v[i];
     }
 
+	this->MAX_VALUE = this->MAX_VALUE * 1000;
+	this->MIN_VALUE = this->MIN_VALUE * 1000;
+
+	this->uniform_dist = std::uniform_real_distribution<double>(this->MIN_VALUE, this->MAX_VALUE);
+
     return v;
 }
 
-virtual double getRandomValue() const override {
-    return this->fRand(this->MIN_VALUE, this->MAX_VALUE);
-}
-
-virtual bool Evaluate(Sign sign, double value, const IndicatorData& data) const override {
-    switch (sign) {
-        case Sign::Gt:
-            return value > data.data;
-        case Sign::Lt:
-            return value < data.data;
-    }
-
-    return false;
-}
-
 protected:
-virtual std::vector<double> _GetIndicatorData(const std::vector<Candlestick>& candlesticks, int * startIndex) = 0;
+virtual std::vector<double> _GetIndicatorData(const std::vector<Candlestick>* candlesticks, int * startIndex) = 0;
 
 static const bool IsRegistered_;
 
-double fRand(double fMin, double fMax) const {
-    double f = (double)rand() / RAND_MAX;
-
-    return fMin + f * (fMax - fMin);
-}
 };
 
 #endif // ifndef __INDICATOR_H

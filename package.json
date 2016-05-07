@@ -1,18 +1,19 @@
 {
   "name": "forex.analytics",
-  "version": "0.0.3",
+  "version": "0.0.14",
   "description": "Performs data anaylsis on a set of candlesticks and using available indicators constructs the best strategy which worked on a certain period.",
   "main": "index.js",
   "engines": {
-    "node": ">= 5.3.0"
+    "node": ">= 4.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/mkmarek/forex.analytics.git"
   },
   "scripts": {
-    "preinstall": "node ./lib/ta-lib/build.js && node-gyp configure && node-gyp rebuild",
-    "clean": "rm -rf ./build && rm -rf ./node_modules && node ./lib/ta-lib/clean.js",
+    "preinstall": "node ./lib/ta-lib/build.js",
+    "postinstall": "node-gyp configure && node-gyp build",
+    "clean": "node ./lib/ta-lib/clean.js",
     "test": "node mocha"
   },
   "gypfile": true,

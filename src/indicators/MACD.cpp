@@ -1,6 +1,7 @@
 #include "../../include/indicators/Indicator.h"
+#include "../../include/indicators/factories/IndicatorFactory.h"
 
-INDICATOR(MACD)(const std::vector<Candlestick>& candlesticks, int* startIndex)
+INDICATOR(MACD)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
 
@@ -10,12 +11,13 @@ INDICATOR(MACD)(const std::vector<Candlestick>& candlesticks, int* startIndex)
   int optInSlowPeriod = 26;
   int optInSignalPeriod = 9;
 
-  if (candlesticks.size() < optInFastPeriod ||
-      candlesticks.size() < optInSlowPeriod ||
-      candlesticks.size() < optInSignalPeriod) {
+  unsigned int lookback = TA_MACD_Lookback(optInFastPeriod,
+    optInSlowPeriod,
+    optInSignalPeriod);
 
-        return indicatorData;
-  }
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
 
   //Initialize all required parameters
   this->PrepareParameters(candlesticks);
@@ -48,7 +50,7 @@ INDICATOR(MACD)(const std::vector<Candlestick>& candlesticks, int* startIndex)
   return indicatorData;
 }
 
-INDICATOR(MACD_Signal)(const std::vector<Candlestick>& candlesticks, int* startIndex)
+INDICATOR(MACD_Signal)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
 
@@ -58,12 +60,14 @@ INDICATOR(MACD_Signal)(const std::vector<Candlestick>& candlesticks, int* startI
   int optInSlowPeriod = 26;
   int optInSignalPeriod = 9;
 
-  if (candlesticks.size() < optInFastPeriod ||
-      candlesticks.size() < optInSlowPeriod ||
-      candlesticks.size() < optInSignalPeriod) {
+  unsigned int lookback = TA_MACD_Lookback(optInFastPeriod,
+    optInSlowPeriod,
+    optInSignalPeriod);
 
-        return indicatorData;
-  }
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
+
 
   //Initialize all required parameters
   this->PrepareParameters(candlesticks);
@@ -96,7 +100,7 @@ INDICATOR(MACD_Signal)(const std::vector<Candlestick>& candlesticks, int* startI
   return indicatorData;
 }
 
-INDICATOR(MACD_Histogram)(const std::vector<Candlestick>& candlesticks, int* startIndex)
+INDICATOR(MACD_Histogram)(const std::vector<Candlestick>* candlesticks, int* startIndex)
 {
   std::vector<double> indicatorData = std::vector<double>();
 
@@ -107,12 +111,14 @@ INDICATOR(MACD_Histogram)(const std::vector<Candlestick>& candlesticks, int* sta
   int optInSlowPeriod = 26;
   int optInSignalPeriod = 9;
 
-  if (candlesticks.size() < optInFastPeriod ||
-      candlesticks.size() < optInSlowPeriod ||
-      candlesticks.size() < optInSignalPeriod) {
+  unsigned int lookback = TA_MACD_Lookback(optInFastPeriod,
+    optInSlowPeriod,
+    optInSignalPeriod);
 
-        return indicatorData;
-  }
+  if (candlesticks->size() <= lookback) {
+		return indicatorData;
+	}
+
 
   //Initialize all required parameters
   this->PrepareParameters(candlesticks);

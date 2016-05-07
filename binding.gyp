@@ -9,6 +9,14 @@
       'cflags!': [ '-fno-exceptions' ],
       'cflags_cc!': [ '-fno-exceptions' ],
       'conditions': [
+        ['OS=="linux"', {
+          "libraries" : [
+            "../lib/ta-lib/lib/libta_abstract_csr.a",
+            "../lib/ta-lib/lib/libta_func_csr.a",
+            "../lib/ta-lib/lib/libta_common_csr.a",
+            "../lib/ta-lib/lib/libta_libc_csr.a",
+          ]
+        }],
         [ 'OS=="mac"', {
 
           'xcode_settings': {
@@ -19,10 +27,10 @@
             },
             "libraries" : [
               "../lib/ta-lib/lib/libta_abstract_csr.a",
-              "../lib/ta-lib/lib/libta_common_csr.a",
               "../lib/ta-lib/lib/libta_func_csr.a",
-              "../lib/ta-lib/lib/libta_libc_csr.a"
-            ],
+              "../lib/ta-lib/lib/libta_common_csr.a",
+              "../lib/ta-lib/lib/libta_libc_csr.a",
+            ]
         }],
         [ 'OS=="win"', {
             "libraries" : [
@@ -30,11 +38,10 @@
               "../lib/ta-lib/lib/ta_common_csr.lib",
               "../lib/ta-lib/lib/ta_func_csr.lib",
               "../lib/ta-lib/lib/ta_libc_csr.lib"
-            ],
+            ]
         }],
       ],
       "sources": [
-        "src/analytics.cpp",
         "src/BinaryTreeFitness.cpp",
         "src/BinaryTreeChromosome.cpp",
         "src/BinaryTreeGeneticAlgo.cpp",
@@ -48,6 +55,9 @@
         "src/indicators/SAR.cpp",
         "src/indicators/SMA.cpp",
         "src/indicators/Stochastic.cpp",
+        "src/indicators/ATR.cpp",
+        "src/indicators/BOP.cpp",
+        "src/indicators/BaseIndicator.cpp",
 
         "src/indicators/factories/IndicatorFactory.cpp",
 
@@ -58,6 +68,13 @@
         "src/nodes/TreeNode.cpp",
 
         "src/utils/HeapSort.cpp",
+
+        "src/export.cpp",
+        "src/functions/convertOHLC.cpp",
+        "src/functions/findStrategy.cpp",
+        "src/functions/getIndicatorData.cpp",
+        "src/functions/getMarketStatus.cpp",
+        "src/functions/getTrades.cpp",
       ]
     }
   ]

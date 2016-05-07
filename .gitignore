@@ -86,9 +86,6 @@ dlldata.c
 project.lock.json
 artifacts/
 
-*_i.c
-*_p.c
-*_i.h
 *.ilk
 *.meta
 *.obj
@@ -233,11 +230,6 @@ UpgradeLog*.htm
 *.mdf
 *.ldf
 
-# Business Intelligence projects
-*.rdl.data
-*.bim.layout
-*.bim_*.settings
-
 # Microsoft Fakes
 FakesAssemblies/
 
@@ -253,16 +245,6 @@ FakesAssemblies/
 # Visual Studio 6 workspace options file
 *.opt
 
-# Visual Studio LightSwitch build output
-**/*.HTMLClient/GeneratedArtifacts
-**/*.DesktopClient/GeneratedArtifacts
-**/*.DesktopClient/ModelManifest.xml
-**/*.Server/GeneratedArtifacts
-**/*.Server/ModelManifest.xml
-_Pvt_Extensions
-
-# Paket dependency manager
-.paket/paket.exe
 
 # FAKE - F# Make
 .fake/
@@ -274,3 +256,4 @@ build
 *.o
 *.tlog
 *.lib
+*.a

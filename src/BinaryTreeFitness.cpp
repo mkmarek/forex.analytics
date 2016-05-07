@@ -4,30 +4,31 @@
 
 BinaryTreeFitness::BinaryTreeFitness(
     FitnessFunction eval,
-    const std::vector<IndicatorTuple>& dataSet) : dataSet(dataSet){
+    const std::vector<IndicatorTuple>* dataSet) {
     this->eval = eval;
+	this->dataSet = dataSet;
 }
 
 inline void multithreadedCalculation(
     unsigned begin,
     unsigned size,
-    const std::vector<BinaryTreeChromosome *>& chromosomes,
-    const std::vector<IndicatorTuple>& dataSet,
+    const std::vector<BinaryTreeChromosome*>* chromosomes,
+    const std::vector<IndicatorTuple>* dataSet,
     FitnessFunction eval) {
 
     for (unsigned i = begin; i < begin + size; i++) {
-        chromosomes[i]->setFitness(eval(FitnessFunctionArgs(chromosomes[i], dataSet)));
+        chromosomes->at(i)->setFitness(eval(FitnessFunctionArgs(chromosomes->at(i), dataSet)));
     }
 }
 
 void BinaryTreeFitness::CalculateFitness(
-    const std::vector<BinaryTreeChromosome *>& chromosomes) const {
+    const std::vector<BinaryTreeChromosome*>* chromosomes) const {
     unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
-	size_t count = chromosomes.size();
+	size_t count = chromosomes->size();
 
     if (concurentThreadsSupported == 0) {
         for (unsigned i = 0; i < count; i++) {
-            chromosomes[i]->setFitness(eval(FitnessFunctionArgs(chromosomes[i], this->dataSet)));
+            chromosomes->at(i)->setFitness(eval(FitnessFunctionArgs(chromosomes->at(i), this->dataSet)));
         }
     } else {
 
@@ -51,5 +52,5 @@ void BinaryTreeFitness::CalculateFitness(
             threads[i]->join();
             delete threads[i];
         }
-    }
+   }
 } // BinaryTreeFitness::CalculateFitness

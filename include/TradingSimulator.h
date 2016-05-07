@@ -16,12 +16,12 @@ public:
 	/**
 	 * Candlestic defining entry of this specific trade
 	 */
-	Candlestick Start;
+	const Candlestick* Start;
 
 	/**
 	 * Candlestic defining exit of this specific trade
 	 */
-	Candlestick End;
+	const Candlestick* End;
 
 	/**
 	 * Is true when a trades was started with a buy action and false it with sell
@@ -34,9 +34,11 @@ public:
 	double MaximumLoss;
 
 	/**
-	 * Defines the maximum proffit during the trade
+	 * Defines the maximum profit during the trade
 	 */
-	double MaximumProffit;
+	double MaximumProfit;
+
+	bool ProfitBeforeLoss;
 
 	/**
 	 * Gets the total revenue of the performed trade
@@ -48,23 +50,19 @@ public:
 	 * Converts a vector of trades to a v8 array
 	 * @param trades  The input vector if trades
 	 * @param output  The output v8 array
-	 * @param isolate The isolate object
 	 */
 	static void ToArray(
 		const std::vector<Trade>& trades,
-		v8::Local<v8::Array>& output,
-		v8::Isolate* isolate);
+		v8::Local<v8::Array>& output);
 
 	/**
 	 * Converts an input trade to a v8 object
 	 * @param trade   The input trade object
 	 * @param output  The output v8 object
-	 * @param isolate The isolate object
 	 */
 	static void ToObject(
 		const Trade& trade,
-		v8::Local<v8::Object>& output,
-		v8::Isolate* isolate);
+		v8::Local<v8::Object>& output);
 };
 
 
@@ -84,7 +82,7 @@ public:
 	 * @param data      Input data used for trade evaluation
 	 * @return          Vector of trades made with passed strategy and test data
 	 */
-	std::vector<Trade> Simulate(
+	std::vector<Trade>* Simulate(
 		const BinaryTreeChromosome* chromosome,
-		const std::vector<IndicatorTuple>& data) const;
+		const std::vector<IndicatorTuple>* data) const;
 };

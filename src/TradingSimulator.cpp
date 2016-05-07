@@ -1,25 +1,28 @@
+#include "nan.h"
+
 #include "../include/TradingSimulator.h"
+#include <iostream>
+
 
 double Trade::getRevenue() const {
     return this->Buy ?
-           this->End.Close - this->Start.Close :
-           this->Start.Close - this->End.Close;
+           this->End->Close - this->Start->Close :
+           this->Start->Close - this->End->Close;
 }
 
 void Trade::ToArray(
     const std::vector<Trade>& trades,
-    v8::Local<v8::Array>& output,
-    v8::Isolate * isolate) {
+    v8::Local<v8::Array>& output) {
 
     size_t tradeCount = trades.size();
 
     for (size_t i = 0; i < tradeCount; i++) {
 
-        v8::Local<v8::Object> object = v8::Object::New(isolate);
+        v8::Local<v8::Object> object = Nan::New<v8::Object>();
 
         const Trade& trade = trades[i];
 
-        Trade::ToObject(trade, object, isolate);
+        Trade::ToObject(trade, object);
 
         output->Set(static_cast<uint32_t>(i), object);
     }
@@ -27,115 +30,144 @@ void Trade::ToArray(
 
 void Trade::ToObject(
     const Trade& trade,
-    v8::Local<v8::Object>& output,
-    v8::Isolate * isolate) {
+    v8::Local<v8::Object>& output) {
 
-    output->Set(v8::String::NewFromUtf8(isolate, "Buy"),
-                v8::Boolean::New(isolate, trade.Buy));
+    output->Set(Nan::New<v8::String>("Buy").ToLocalChecked(),
+                Nan::New<v8::Boolean>(trade.Buy));
 
-    output->Set(v8::String::NewFromUtf8(isolate, "Revenue"),
-                v8::Number::New(isolate, trade.getRevenue()));
+    output->Set(Nan::New<v8::String>("Revenue").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.getRevenue()));
 
-    output->Set(v8::String::NewFromUtf8(isolate, "MaximumLoss"),
-                v8::Number::New(isolate, trade.MaximumLoss));
+    output->Set(Nan::New<v8::String>("MaximumLoss").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.MaximumLoss));
 
-    output->Set(v8::String::NewFromUtf8(isolate, "MaximumProffit"),
-                v8::Number::New(isolate, trade.MaximumProffit));
+    output->Set(Nan::New<v8::String>("MaximumProfit").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.MaximumProfit));
 
-    v8::Local<v8::Object> start = v8::Object::New(isolate);
-    v8::Local<v8::Object> end = v8::Object::New(isolate);
+    output->Set(Nan::New<v8::String>("ProfitBeforeLoss").ToLocalChecked(),
+                Nan::New<v8::Number>(trade.ProfitBeforeLoss));
 
-    Candlestick::ToObject(trade.Start, start, isolate);
-    Candlestick::ToObject(trade.End, end, isolate);
+	v8::Local<v8::Object> start = Nan::New<v8::Object>();
+    v8::Local<v8::Object> end = Nan::New<v8::Object>();
 
-    output->Set(v8::String::NewFromUtf8(isolate, "start"),
-                start);
-    output->Set(v8::String::NewFromUtf8(isolate, "end"),
-                end);
+    Candlestick::ToObject(*trade.Start, start);
+    Candlestick::ToObject(*trade.End, end);
 
+    output->Set(Nan::New<v8::String>("start").ToLocalChecked() ,start);
+    output->Set(Nan::New<v8::String>("end").ToLocalChecked(), end);
 }
 
-std::vector<Trade> TradingSimulator::Simulate(
+std::vector<Trade>* TradingSimulator::Simulate(
     const BinaryTreeChromosome * chromosome,
-    const std::vector<IndicatorTuple>& data) const {
-    bool shouldBuy, shouldSell, buy = false;
-    std::vector<Trade> trades;
+    const std::vector<IndicatorTuple>* data) const {
+
+    std::vector<Trade>* trades = new std::vector<Trade>();
 
     const Candlestick * start = nullptr;
+
+	int profitIndex = 0;
+	int lossIndex = 0;
     double maximumPotentialLoss = 0.0;
-    double maximumPotentialProffit = 0.0;
+    double maximumPotentialProfit = 0.0;
 
-    for (unsigned long i = 0; i < data.size(); i++) {
-        shouldBuy = chromosome->buy->Evaluate(data[i].Element);
-        shouldSell = chromosome->sell->Evaluate(data[i].Element);
 
-        if (shouldBuy == true && shouldSell == false) {
-            // if we're in trade and we're selling then close it and start a new one
-            if (start != nullptr && buy == false) {
+		bool shouldBuy, shouldSell, buy = false;
 
-                Trade t;
-                t.Start = *start;
-                t.End = data[i].Element.begin()->second.candlestick;
-                t.Buy = buy;
-                t.MaximumProffit = maximumPotentialProffit;
-                t.MaximumLoss = maximumPotentialLoss;
+		for (unsigned long i = 0; i < data->size(); i++) {
+			shouldBuy = chromosome->shouldBuy(data->at(i).Element);
+			shouldSell = chromosome->shouldSell(data->at(i).Element);
 
-                trades.push_back(t);
+			if (shouldBuy == true && shouldSell == false) {
+				// if we're in trade and we're selling then close it and start a new one
+				if (start != nullptr && buy == false) {
 
-                start = &(data[i].Element.begin()->second.candlestick);
+					Trade t;
+					t.Start = start;
+					t.End = &data->at(i).Element.begin()->second.candlestick;
+					t.Buy = buy;
+					t.MaximumProfit = maximumPotentialProfit;
+					t.MaximumLoss = maximumPotentialLoss;
+					t.ProfitBeforeLoss = profitIndex < lossIndex;
 
-                maximumPotentialLoss = 0.0;
-                maximumPotentialProffit = 0.0;
-            }
-            // or if not in trade at all
-            else if (start == nullptr) {
-                start = &(data[i].Element.begin()->second.candlestick);
-            }
+					trades->push_back(t);
 
-            double intermediateProffit = data[i].Element.begin()->second.candlestick.High - start->Close;
-            double intermediateLoss = start->Close - data[i].Element.begin()->second.candlestick.Low;
+					start = &(data->at(i).Element.begin()->second.candlestick);
 
-            if (intermediateLoss > maximumPotentialLoss)
-              maximumPotentialLoss = intermediateLoss;
+					profitIndex = 0;
+					lossIndex = 0;
+					maximumPotentialLoss = 0.0;
+					maximumPotentialProfit = 0.0;
+				}
+				// or if not in trade at all
+				else if (start == nullptr) {
+					start = &(data->at(i).Element.begin()->second.candlestick);
+				}
 
-            if (intermediateProffit > maximumPotentialProffit)
-              maximumPotentialProffit = intermediateProffit;
 
-            buy = true;
-        }
+				buy = true;
+			}
 
-        if (shouldBuy == false && shouldSell == true) {
-            if (start != nullptr && buy == true) {
+			if (buy == true && start != nullptr)
+			{
+				double intermediateProfit = data->at(i).Element.begin()->second.candlestick.High - start->Close;
+				double intermediateLoss = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
 
-                Trade t;
-                t.Start = *start;
-                t.End = data[i].Element.begin()->second.candlestick;
-                t.Buy = buy;
-                t.MaximumProffit = maximumPotentialProffit;
-                t.MaximumLoss = maximumPotentialLoss;
+				if (intermediateLoss > maximumPotentialLoss) {
+					maximumPotentialLoss = intermediateLoss;
+					lossIndex = i;
+				}
 
-                trades.push_back(t);
+				if (intermediateProfit > maximumPotentialProfit) {
+					maximumPotentialProfit = intermediateProfit;
+					profitIndex = i;
+				}
+			}
 
-                start = &(data[i].Element.begin()->second.candlestick);
+			if (shouldBuy == false && shouldSell == true) {
+				if (start != nullptr && buy == true) {
 
-                maximumPotentialLoss = 0.0;
-                maximumPotentialProffit = 0.0;
+					Trade t;
+					t.Start = start;
+					t.End = &data->at(i).Element.begin()->second.candlestick;
+					t.Buy = buy;
+					t.MaximumProfit = maximumPotentialProfit;
+					t.MaximumLoss = maximumPotentialLoss;
+					t.ProfitBeforeLoss = profitIndex < lossIndex;
 
-            } else if (start == nullptr) {
-                start = &(data[i].Element.begin()->second.candlestick);
-            }
+					trades->push_back(t);
 
-            double intermediateProffit = start->Close - data[i].Element.begin()->second.candlestick.Low;
-            double intermediateLoss = data[i].Element.begin()->second.candlestick.High - start->Close;
+					start = &(data->at(i).Element.begin()->second.candlestick);
 
-            if (intermediateLoss > maximumPotentialLoss)
-              maximumPotentialLoss = intermediateLoss;
+					profitIndex = 0;
+					lossIndex = 0;
+					maximumPotentialLoss = 0.0;
+					maximumPotentialProfit = 0.0;
 
-            if (intermediateProffit > maximumPotentialProffit)
-              maximumPotentialProffit = intermediateProffit;
+				}
+				else if (start == nullptr) {
+					start = &(data->at(i).Element.begin()->second.candlestick);
+				}
 
-            buy = false;
-        }
+				buy = false;
+			}
+
+			if (buy == false && start != nullptr)
+			{
+
+				double intermediateProfit = start->Close - data->at(i).Element.begin()->second.candlestick.Low;
+				double intermediateLoss = data->at(i).Element.begin()->second.candlestick.High - start->Close;
+
+				if (intermediateLoss > maximumPotentialLoss) {
+					maximumPotentialLoss = intermediateLoss;
+					lossIndex = i;
+				}
+
+				if (intermediateProfit > maximumPotentialProfit) {
+					maximumPotentialProfit = intermediateProfit;
+					profitIndex = i;
+				}
+			}
+
     }
 
     return trades;

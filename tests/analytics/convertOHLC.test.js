@@ -2,7 +2,7 @@ var assert = require('assert'),
   chai = require('chai'),
   expect = chai.expect,
   should = chai.should(),
-  analytics = require('../../build/Release/analytics.node'),
+  analytics = require('../../index'),
   candlesticks = require('../candlesticks');
 
 
@@ -51,7 +51,7 @@ describe('analytics', function() {
         expect(ohlc.length).to.be.equal(0);
       });
     });
-    
+
     describe('(candlesticks, timeframe)', function() {
 
       var error = null;

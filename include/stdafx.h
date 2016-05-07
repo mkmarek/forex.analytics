@@ -9,3 +9,8 @@
 #include "ta_defs.h"
 #include "ta_func.h"
 #include "ta_libc.h"
+#include "ta_defs.h"
+#include <random>
+
+
+struct IndicatorTuple;

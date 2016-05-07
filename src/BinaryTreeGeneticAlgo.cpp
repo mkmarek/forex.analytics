@@ -1,6 +1,4 @@
 #include "../include/BinaryTreeGeneticAlgo.h"
-#include "../include/nodes/OperatorTreeNode.h"
-#include "../include/nodes/IndicatorTreeNode.h"
 
 BinaryTreeGeneticAlgo::BinaryTreeGeneticAlgo(
 	int selectNumber,
@@ -21,92 +19,52 @@ BinaryTreeGeneticAlgo::~BinaryTreeGeneticAlgo() {
 }
 
 void BinaryTreeGeneticAlgo::Select(
-	std::vector<BinaryTreeChromosome *>& newGeneration,
-	std::vector<BinaryTreeChromosome *>& oldGeneration,
+	std::vector<BinaryTreeChromosome*>* newGeneration,
+	std::vector<BinaryTreeChromosome*>* oldGeneration,
 	unsigned size) {
 
-	for (unsigned i = size - 1, y = 0; i >= size - this->select; i--, y++) {
-		newGeneration[y]->setFitness(oldGeneration[i]->getFitness());
+	std::default_random_engine generator;
+	std::uniform_int_distribution<unsigned> distribution(0, this->select);
 
-		oldGeneration[i]->buy->Copy(newGeneration[y]->buy);
-		oldGeneration[i]->sell->Copy(newGeneration[y]->sell);
+	for (unsigned i = size - 1, y = 0; i >= size - this->select; i--, y++) {
+		newGeneration->at(y)->setFitness(oldGeneration->at(i)->getFitness());
+		oldGeneration->at(i)->copyTo(newGeneration->at(y));
+
 	}
 
 	for (unsigned i = this->select; i < size; i++) {
-		this->Mutate(newGeneration, this->select, newGeneration[i]);
+		unsigned index = distribution(generator);
+		this->Mutate(newGeneration, index, newGeneration->at(i));
 	}
 
 	this->Crossover(newGeneration);
 }
 
-unsigned factorial(unsigned n) {
-	return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
-}
-
 void BinaryTreeGeneticAlgo::Mutate(
-	std::vector<BinaryTreeChromosome *>& generation,
-	unsigned size,
+	std::vector<BinaryTreeChromosome*>* generation,
+	unsigned index,
 	BinaryTreeChromosome * outputChromosome) {
-	unsigned maxRand = factorial(size);
-	unsigned rnd = rand() % maxRand;
-	unsigned index = 0;
 
-	for (; index < size && factorial(index) < rnd; index++) {
-	}
+	generation->at(index)->copyTo(outputChromosome);
 
-	generation[index]->buy->Copy(outputChromosome->buy);
-	generation[index]->sell->Copy(outputChromosome->sell);
-
-	this->Mutate(outputChromosome->buy);
-	this->Mutate(outputChromosome->sell);
+	outputChromosome->Mutate(leafValueMutationProbability,
+		leafValueSignMutationProbability,
+		logicalNodeMutationProbability,
+		crossoverProbability,
+		leafIndicatorMutationProbability);
 }
 
-void BinaryTreeGeneticAlgo::Mutate(TreeNode * node) {
-	if (node->left != nullptr && node->right != nullptr) {
-		OperatorTreeNode * opNode = static_cast<OperatorTreeNode *>(node);
-
-		double logicalNodeMutation = static_cast<double>(rand() % 100) / 100;
-
-		if (logicalNodeMutation <= logicalNodeMutationProbability) {
-			opNode->GenerateRandomValue();
-		}
-
-		this->Mutate(opNode->left);
-		this->Mutate(opNode->right);
-	}
-	else {
-		IndicatorTreeNode * inNode = static_cast<IndicatorTreeNode *>(node);
-
-		double leafValueMutation = static_cast<double>(rand() % 100) / 100;
-		double leafValueSignMutation = static_cast<double>(rand() % 100) / 100;
-		double leafValueIndicatorMutation = static_cast<double>(rand() % 100) / 100;
-
-		if (leafValueMutation <= this->leafValueMutationProbability) {
-			inNode->GenerateRandomValue();
-		}
-
-		if (leafValueIndicatorMutation <= this->leafIndicatorMutationProbability) {
-			inNode->GenerateRandomIndicator();
-		}
-
-		if (leafValueSignMutation <= this->leafValueSignMutationProbability) {
-			inNode->GenerateRandomSign();
-		}
-
-	}
-} // BinaryTreeGeneticAlgo::Mutate
-
-void BinaryTreeGeneticAlgo::Crossover(std::vector<BinaryTreeChromosome *>& generation) {
-	for (unsigned long i = this->select + 1; i < generation.size(); i++) {
+void BinaryTreeGeneticAlgo::Crossover(std::vector<BinaryTreeChromosome*>* generation) {
+	for (unsigned long i = this->select + 1; i < generation->size(); i++) {
 		double crossover = static_cast<double>(rand() % 100) / 100;
 
 		if (crossover <= this->crossoverProbability) {
 			unsigned long rnd = i;
 
 			while (rnd == i || rnd <= this->select)
-				rnd = rand() % generation.size();
+				rnd = rand() % generation->size();
 
-			this->Crossover(generation[i], generation[rnd]);
+			this->Crossover(generation->at(i), generation->at(rnd));
 		}
 	}
 }

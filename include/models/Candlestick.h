@@ -23,8 +23,7 @@ long Time;
  */
 static void CreateFromArray(
     std::vector<Candlestick>& candlesticks,
-    const v8::Local<v8::Array>& input,
-    v8::Isolate * isolate);
+    const v8::Local<v8::Array>& input);
 
 /**
  * Creates a candlestick instance from a v8 object
@@ -32,9 +31,7 @@ static void CreateFromArray(
  * @param  isolate The isolate object
  * @return         New instance of candlestick class
  */
-static Candlestick CreateFromObject(
-    const v8::Local<v8::Object>& input,
-    v8::Isolate * isolate);
+static Candlestick CreateFromObject(const v8::Local<v8::Object>& input);
 
 /**
  * Converts vector of candlesticks to v8 array of objects
@@ -44,8 +41,7 @@ static Candlestick CreateFromObject(
  */
 static void ToArray(
     const std::vector<Candlestick>& candlesticks,
-    v8::Local<v8::Array>& output,
-    v8::Isolate * isolate);
+    v8::Local<v8::Array>& output);
 
 /**
  * Converts a single candlestick to a corresponding v8 object
@@ -55,6 +51,5 @@ static void ToArray(
  */
 static void ToObject(
     const Candlestick& candlestick,
-    v8::Local<v8::Object>& output,
-    v8::Isolate * isolate);
+    v8::Local<v8::Object>& output);
 };
