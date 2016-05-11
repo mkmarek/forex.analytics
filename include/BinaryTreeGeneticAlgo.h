@@ -87,8 +87,13 @@ public:
 	 */
 	void Mutate(
 		std::vector<BinaryTreeChromosome*>* chromosomeInput,
-		unsigned size,
-		BinaryTreeChromosome* outputChromosome);
+		unsigned index,
+		BinaryTreeChromosome* outputChromosome,
+		double leafValueMutationProbability,
+		double leafValueSignMutationProbability,
+		double logicalNodeMutationProbability,
+		double crossoverProbability,
+		double leafIndicatorMutationProbability);
 
 	/**
 	 * Performs a crossover in a certain generation

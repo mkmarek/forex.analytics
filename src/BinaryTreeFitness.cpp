@@ -4,9 +4,14 @@
 
 BinaryTreeFitness::BinaryTreeFitness(
     FitnessFunction eval,
-    const std::vector<IndicatorTuple>* dataSet) {
+    const std::vector<IndicatorTuple>* dataSet,
+    double pipInDecimals,
+  	double spread) {
+
     this->eval = eval;
-	this->dataSet = dataSet;
+	  this->dataSet = dataSet;
+    this->spread = spread;
+    this->pipInDecimals = pipInDecimals;
 }
 
 inline void multithreadedCalculation(
@@ -14,10 +19,13 @@ inline void multithreadedCalculation(
     unsigned size,
     const std::vector<BinaryTreeChromosome*>* chromosomes,
     const std::vector<IndicatorTuple>* dataSet,
-    FitnessFunction eval) {
+    FitnessFunction eval,
+    double pipInDecimals,
+    double spread) {
 
     for (unsigned i = begin; i < begin + size; i++) {
-        chromosomes->at(i)->setFitness(eval(FitnessFunctionArgs(chromosomes->at(i), dataSet)));
+        chromosomes->at(i)->setFitness(eval(FitnessFunctionArgs(
+          chromosomes->at(i), dataSet, pipInDecimals, spread)));
     }
 }
 
@@ -28,7 +36,8 @@ void BinaryTreeFitness::CalculateFitness(
 
     if (concurentThreadsSupported == 0) {
         for (unsigned i = 0; i < count; i++) {
-            chromosomes->at(i)->setFitness(eval(FitnessFunctionArgs(chromosomes->at(i), this->dataSet)));
+            chromosomes->at(i)->setFitness(eval(FitnessFunctionArgs(
+              chromosomes->at(i), this->dataSet, this->pipInDecimals,this->spread)));
         }
     } else {
 
@@ -44,7 +53,9 @@ void BinaryTreeFitness::CalculateFitness(
                                   static_cast<int>(size),
                                   chromosomes,
                                   this->dataSet,
-                                  eval
+                                  eval,
+                                  this->pipInDecimals,
+                                  this->spread
                                   ));
         }
 

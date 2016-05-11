@@ -54,6 +54,12 @@ public:
  * @param  crossoverProbability             Probability for performing crossover
  *                                           (0.0 - 1.0)
  *
+ * @param  spread             Spread that should be taken into account when
+ *                            performing trade estimations. Specify it in pips
+ *
+ * @param  pipInDecimals      Pip represented in decimals. For EUR/USD it
+ *                            would be for example: 0.0001
+ *
  * @param  update							Lambda expression called during progress update
 
  * @return                                  The best fit chromosome found
@@ -69,6 +75,8 @@ BinaryTreeChromosome* PerformAnalysis(
         double logicalNodeMutationProbability,
         double leafIndicatorMutationProbability,
         double crossoverProbability,
+        double pipInDecimals,
+        double spread,
         BinaryTreeChromosome* chromosomeToStartWith,
         std::function<void(double fitness, BinaryTreeChromosome * chromosome, int generation)> update);
 

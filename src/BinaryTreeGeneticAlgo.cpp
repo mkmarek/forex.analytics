@@ -32,9 +32,20 @@ void BinaryTreeGeneticAlgo::Select(
 
 	}
 
-	for (unsigned i = this->select; i < size; i++) {
+	for (unsigned i = this->select; i < (size - this->select) / 3 * 2; i++) {
 		unsigned index = distribution(generator);
-		this->Mutate(newGeneration, index, newGeneration->at(i));
+		this->Mutate(newGeneration, index, newGeneration->at(i),
+			leafValueMutationProbability,
+			leafValueSignMutationProbability,
+			logicalNodeMutationProbability,
+			crossoverProbability,
+			leafIndicatorMutationProbability);
+	}
+
+	for (unsigned i = double(size - this->select) / 3 * 2; i < size; i++) {
+		unsigned index = distribution(generator);
+		this->Mutate(newGeneration, index, newGeneration->at(i),
+		1.0, 1.0, 1.0, 1.0, 1.0);
 	}
 
 	this->Crossover(newGeneration);
@@ -43,7 +54,12 @@ void BinaryTreeGeneticAlgo::Select(
 void BinaryTreeGeneticAlgo::Mutate(
 	std::vector<BinaryTreeChromosome*>* generation,
 	unsigned index,
-	BinaryTreeChromosome * outputChromosome) {
+	BinaryTreeChromosome * outputChromosome,
+	double leafValueMutationProbability,
+	double leafValueSignMutationProbability,
+	double logicalNodeMutationProbability,
+	double crossoverProbability,
+	double leafIndicatorMutationProbability) {
 
 	generation->at(index)->copyTo(outputChromosome);
 

@@ -13,6 +13,7 @@ const double DEFAULT_LEAF_SIGN_MUTATION_PROBABILITY = 0.3;
 const double DEFAULT_LOGICAL_NODE_MUTATION_PROBABILITY = 0.3;
 const double DEFAULT_LEAF_INDICATOR_MUTATION_PROBABILITY = 0.2;
 const double DEFAULT_CROSSOVER_PROBABILITY = 0.03;
+const double DEFAULT_SPREAD = 0.0;
 
 // the 'baton' is the carrier for data between functions
 struct FindStrategyBaton
@@ -33,6 +34,8 @@ struct FindStrategyBaton
 	double logicalNodeMutationProbability;
 	double leafIndicatorMutationProbability;
 	double crossoverProbability;
+	double spread;
+	double pipInDecimals;
 };
 
 struct StrategyUpdateBaton
@@ -92,6 +95,8 @@ public:
 				baton->logicalNodeMutationProbability,
 				baton->leafIndicatorMutationProbability,
 				baton->crossoverProbability,
+				baton->pipInDecimals,
+				baton->spread,
 				baton->startingChromosome,
 				update);
 		}
@@ -187,40 +192,6 @@ private:
 	FindStrategyBaton* baton;
 };
 
-bool findStrategyValidateInput(const Nan::FunctionCallbackInfo<v8::Value>& args)
-{
-	if (args.Length() < 1)
-	{
-		Nan::ThrowTypeError("Wrong number of arguments");
-		return false;
-	}
-
-	if (!args[0]->IsArray())
-	{
-		Nan::ThrowTypeError("Wrong first argument. Expecting array of candlesticks");
-		return false;
-	}
-
-	if (!args[1]->IsUndefined() && (!args[1]->IsObject() || args[1]->IsArray()))
-	{
-		Nan::ThrowTypeError("Wrong second argument. Expecting object with genetic algorithm configuration");
-		return false;
-	}
-
-	if (!args[2]->IsUndefined() && (!args[2]->IsFunction()))
-	{
-		Nan::ThrowTypeError("Wrong third argument. Expecting a function");
-		return false;
-	}
-
-	if (!args[3]->IsUndefined() && (!args[3]->IsFunction()))
-	{
-		Nan::ThrowTypeError("Wrong fourth argument. Expecting a function");
-		return false;
-	}
-
-	return true;
-}
 
 int getIntOrDefault(v8::Handle<v8::Object> object, const char* name, int def)
 {
@@ -254,6 +225,60 @@ v8::Handle<v8::Array> getArrayFromArguments(const Nan::FunctionCallbackInfo<v8::
 	return Nan::New<v8::Array>();
 }
 
+bool findStrategyValidateInput(const Nan::FunctionCallbackInfo<v8::Value>& args)
+{
+	if (args.Length() < 2)
+	{
+		Nan::ThrowTypeError("Wrong number of arguments");
+		return false;
+	}
+
+	if (!args[0]->IsArray())
+	{
+		Nan::ThrowTypeError("Wrong first argument. Expecting array of candlesticks");
+		return false;
+	}
+
+	if (args[1]->IsUndefined() || !args[1]->IsObject() || args[1]->IsArray())
+	{
+		Nan::ThrowTypeError("Wrong second argument. Expecting object with genetic algorithm configuration");
+		return false;
+	}
+
+	if (!args[2]->IsUndefined() && (!args[2]->IsFunction()))
+	{
+		Nan::ThrowTypeError("Wrong third argument. Expecting a function");
+		return false;
+	}
+
+	if (!args[3]->IsUndefined() && (!args[3]->IsFunction()))
+	{
+		Nan::ThrowTypeError("Wrong fourth argument. Expecting a function");
+		return false;
+	}
+
+	v8::Handle<v8::Object> configuration = getObjectFromArguments(args, 1);
+
+	if (!configuration->Has(Nan::New<v8::String>("pipInDecimals").ToLocalChecked()))
+	{
+		Nan::ThrowTypeError("Expecting configuration object to have pipInDecimals value set");
+		return false;
+	}
+
+	if (!configuration->Get(Nan::New<v8::String>("pipInDecimals").ToLocalChecked())->IsNumber())
+	{
+		Nan::ThrowTypeError("Expecting pipInDecimals to be a number");
+		return false;
+	}
+
+	if (getNumberOrDefault(configuration, "pipInDecimals", 0) <= 0)
+	{
+		Nan::ThrowTypeError("Expecting pipInDecimals to be larger than 0");
+		return false;
+	}
+
+	return true;
+}
 
 NAN_METHOD(findStrategy)
 {
@@ -293,6 +318,15 @@ NAN_METHOD(findStrategy)
 			configuration, "crossoverProbability",
 			DEFAULT_CROSSOVER_PROBABILITY);
 
+		double spread = getNumberOrDefault(
+			configuration, "spread",
+			DEFAULT_SPREAD);
+
+
+		double pipInDecimals = configuration->Get(Nan::New<v8::String>("pipInDecimals")
+			.ToLocalChecked())->NumberValue();
+
+
 		//If the indicator array is present use it to create indicators
 		if (configuration->Has(Nan::New<v8::String>("indicators").ToLocalChecked()))
 		{
@@ -326,6 +360,8 @@ NAN_METHOD(findStrategy)
 		baton->logicalNodeMutationProbability = logicalNodeMutationProbability;
 		baton->leafIndicatorMutationProbability = leafIndicatorMutationProbability;
 		baton->crossoverProbability = crossoverProbability;
+		baton->spread = spread;
+		baton->pipInDecimals = pipInDecimals;
 
 		baton->startingChromosome = nullptr;
 

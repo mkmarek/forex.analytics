@@ -38,7 +38,7 @@ describe('analytics', function() {
           });
       });
 
-      it('should throw validation error because at least candlestick parameter is required', function() {
+      it('should throw validation error because candlestick parameter is required', function() {
         expect('' + error).to.be.equal('TypeError: Wrong first argument. Expecting array of candlesticks');
       });
     });
@@ -52,6 +52,90 @@ describe('analytics', function() {
         this.timeout(0);
 
         analytics.findStrategy(candlesticks.splice(0, 60))
+
+        .then(function(s) {
+          strategy = s;
+          error = null;
+          done();
+        })
+
+        .catch(function(e) {
+          strategy = null;
+          error = e;
+          done();
+        });
+      });
+
+      it('should throw validation error because options parameter is required', function() {
+        expect('' + error).to.be.equal('TypeError: Wrong second argument. Expecting object with genetic algorithm configuration');
+      });
+    });
+
+    describe('(candlesticks, { })', function() {
+      var error;
+      var strategy;
+
+      before(function(done) {
+
+        this.timeout(0);
+
+        analytics.findStrategy(candlesticks.splice(0, 60))
+
+        .then(function(s) {
+          strategy = s;
+          error = null;
+          done();
+        })
+
+        .catch(function(e) {
+          strategy = null;
+          error = e;
+          done();
+        });
+      });
+
+      it('should throw validation error because options parameter is required', function() {
+        expect('' + error).to.be.equal('TypeError: Wrong second argument. Expecting object with genetic algorithm configuration');
+      });
+    });
+
+    describe('(candlesticks, { pipInDecimals : 0 })', function() {
+      var error;
+      var strategy;
+
+      before(function(done) {
+
+        this.timeout(0);
+
+        analytics.findStrategy(candlesticks, { pipInDecimals: 0 })
+
+        .then(function(s) {
+          strategy = s;
+          error = null;
+          done();
+        })
+
+        .catch(function(e) {
+          strategy = null;
+          error = e;
+          done();
+        });
+      });
+
+      it('should throw validation error because pipInDecimals can\'t be zero or lower', function() {
+        expect('' + error).to.be.equal('TypeError: Expecting pipInDecimals to be larger than 0');
+      });
+    });
+
+    describe('(candlesticks, { pipInDecimals : 0.0001 })', function() {
+      var error;
+      var strategy;
+
+      before(function(done) {
+
+        this.timeout(0);
+
+        analytics.findStrategy(candlesticks, { pipInDecimals : 0.001 })
 
         .then(function(s) {
           strategy = s;
@@ -94,7 +178,8 @@ describe('analytics', function() {
         this.timeout(0);
 
         analytics.findStrategy(candlesticks.splice(0, 50), {
-          generationCount
+          generationCount,
+          pipInDecimals : 0.001
         }, () => {
           statusCounter++;
         })
@@ -143,7 +228,8 @@ describe('analytics', function() {
           this.timeout(0);
 
           analytics.findStrategy([], {
-            indicators: [indicator]
+            indicators: [indicator],
+            pipInDecimals : 0.001
           })
 
           .then(function(s) {
