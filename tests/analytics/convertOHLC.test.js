@@ -18,7 +18,7 @@ describe('analytics', function() {
           error = e;
         }
 
-        expect('' + error).to.be.equal('TypeError: Wrong number of arguments');
+        expect('' + error).to.be.equal('TypeError: Candlesticks parameter is required for convertOhlc function');
       });
     });
 
@@ -32,7 +32,7 @@ describe('analytics', function() {
           error = e;
         }
 
-        expect('' + error).to.be.equal('TypeError: Wrong number of arguments');
+        expect('' + error).to.be.equal('TypeError: Resolution parameter for convertOhlc is required and cannot be lower than 1');
       });
     });
 
@@ -63,11 +63,7 @@ describe('analytics', function() {
           {"open":1.11393,"low":1.1129,"high":1.11431,"close":1.1129,"time":100}
         ];
 
-        try {
-          ohlc = analytics.convertOHLC(candlesticks, 200);
-        } catch(e) {
-          error = e;
-        }
+        ohlc = analytics.convertOHLC(candlesticks, 200);
       });
 
       it('should merge two predefined candlesticks when converting to larger timeframe', function() {

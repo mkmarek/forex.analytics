@@ -3,20 +3,11 @@
     {
       "target_name": "analytics",
       "include_dirs": [
-        "<!(node -e \"require('nan')\")",
-        "lib/ta-lib/include"
+        "<!(node -e \"require('nan')\")"
       ],
       'cflags!': [ '-fno-exceptions' ],
       'cflags_cc!': [ '-fno-exceptions' ],
       'conditions': [
-        ['OS=="linux"', {
-          "libraries" : [
-            "../lib/ta-lib/lib/libta_abstract_csr.a",
-            "../lib/ta-lib/lib/libta_func_csr.a",
-            "../lib/ta-lib/lib/libta_common_csr.a",
-            "../lib/ta-lib/lib/libta_libc_csr.a",
-          ]
-        }],
         [ 'OS=="mac"', {
 
           'xcode_settings': {
@@ -24,57 +15,27 @@
             'OTHER_LDFLAGS': ['-stdlib=libc++'],
             'MACOSX_DEPLOYMENT_TARGET': '10.7',
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
-            },
-            "libraries" : [
-              "../lib/ta-lib/lib/libta_abstract_csr.a",
-              "../lib/ta-lib/lib/libta_func_csr.a",
-              "../lib/ta-lib/lib/libta_common_csr.a",
-              "../lib/ta-lib/lib/libta_libc_csr.a",
-            ]
-        }],
-        [ 'OS=="win"', {
-            "libraries" : [
-              "../lib/ta-lib/lib/ta_abstract_csr.lib",
-              "../lib/ta-lib/lib/ta_common_csr.lib",
-              "../lib/ta-lib/lib/ta_func_csr.lib",
-              "../lib/ta-lib/lib/ta_libc_csr.lib"
-            ]
-        }],
+            }
+        }]
       ],
       "sources": [
-        "src/BinaryTreeFitness.cpp",
-        "src/BinaryTreeChromosome.cpp",
-        "src/BinaryTreeGeneticAlgo.cpp",
-        "src/TradingSystem.cpp",
-        "src/TradingSimulator.cpp",
+        "src_cpp/Analytics.cpp",
+        "src_cpp/TradingSimulator.cpp",
+        "src_cpp/BinaryTreeFitness.cpp",
+        "src_cpp/BinaryTreeChromosome.cpp",
+        "src_cpp/BinaryTreeGeneticAlgo.cpp",
+        "src_cpp/Export.cpp",
+        "src_cpp/FitnessEvaluation.cpp",
 
-        "src/indicators/CCI.cpp",
-        "src/indicators/MACD.cpp",
-        "src/indicators/Momentum.cpp",
-        "src/indicators/RSI.cpp",
-        "src/indicators/SAR.cpp",
-        "src/indicators/SMA.cpp",
-        "src/indicators/Stochastic.cpp",
-        "src/indicators/ATR.cpp",
-        "src/indicators/BOP.cpp",
-        "src/indicators/BaseIndicator.cpp",
+        "src_cpp/nodes/IndicatorTreeNode.cpp",
+        "src_cpp/nodes/OperatorTreeNode.cpp",
+        "src_cpp/nodes/TreeNode.cpp",
 
-        "src/indicators/factories/IndicatorFactory.cpp",
+        "src_cpp/utils/HeapSort.cpp",
 
-        "src/models/Candlestick.cpp",
-
-        "src/nodes/IndicatorTreeNode.cpp",
-        "src/nodes/OperatorTreeNode.cpp",
-        "src/nodes/TreeNode.cpp",
-
-        "src/utils/HeapSort.cpp",
-
-        "src/export.cpp",
-        "src/functions/convertOHLC.cpp",
-        "src/functions/findStrategy.cpp",
-        "src/functions/getIndicatorData.cpp",
-        "src/functions/getMarketStatus.cpp",
-        "src/functions/getTrades.cpp",
+        "src_cpp/functions/findStrategy.cpp",
+        "src_cpp/functions/getMarketStatus.cpp",
+        "src_cpp/functions/getTrades.cpp"
       ]
     }
   ]
