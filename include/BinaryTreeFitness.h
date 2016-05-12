@@ -23,13 +23,18 @@ struct FitnessFunctionArgs {
 public:
 	BinaryTreeChromosome* chromosome;
 	const std::vector<IndicatorTuple>* data;
+	double pipInDecimals;
+	double spread;
 
 	FitnessFunctionArgs(
 		BinaryTreeChromosome* chromosome,
-		const std::vector<IndicatorTuple>* data) {
+		const std::vector<IndicatorTuple>* data,
+		double pipInDecimals, double spread) {
 
 		this->chromosome = chromosome;
 		this->data = data;
+		this->pipInDecimals = pipInDecimals;
+		this->spread = spread;
 	}
 };
 
@@ -45,6 +50,9 @@ typedef double(*FitnessFunction)(FitnessFunctionArgs args);
 class BinaryTreeFitness
 {
 private:
+
+	double pipInDecimals;
+	double spread;
 
 	/**
 	 * Pointer to a fitness function
@@ -67,7 +75,9 @@ public:
 	 */
 	BinaryTreeFitness(
 		FitnessFunction eval,
-		const std::vector<IndicatorTuple>* dataSet
+		const std::vector<IndicatorTuple>* dataSet,
+		double pipInDecimals,
+  	double spread
 		);
 
 	/**

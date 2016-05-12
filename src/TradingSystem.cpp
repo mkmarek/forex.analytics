@@ -19,42 +19,33 @@ inline double EvaluateFitness(FitnessFunctionArgs args)
 	TradingSimulator simulator;
 	std::vector<Trade>* trades = simulator.Simulate(args.chromosome, args.data);
 
+	if (trades->size() == 0)
+	{
+		return 0;
+	}
+
 	double points = 0;
-	int positive = 0;
-	int negative = 0;
 
 	for (unsigned long i = 0; i < trades->size(); i++)
 	{
 		int duration = trades->at(i).End->Time - trades->at(i).Start->Time;
+		double spreadValue = args.pipInDecimals * args.spread;
+		double revenue = trades->at(i).getRevenue() - spreadValue;
 
-
-		if (duration != 0) {
-
-			if (trades->at(i).MaximumProfit > trades->at(i).MaximumLoss * 4 && trades->at(i).ProfitBeforeLoss)
-			{
-				//TODO: This is currently tailored for EUR/USD - will need to be changed
-				points += trades->at(i).MaximumProfit / duration * 900 * 10;
-				positive++;
-			}
-			else if (trades->at(i).MaximumProfit > trades->at(i).MaximumLoss * 4)
-			{
-				//TODO: This is currently tailored for EUR/USD - will need to be changed
-				points += trades->at(i).MaximumProfit / duration * 900;
-				positive++;
-			}
-			else
-			{
-				points -= trades->at(i).MaximumLoss;
-				negative++;
-			}
+		if (revenue > 0)
+		{
+			points += 1.0 / duration;
+		}
+		else
+		{
+			points -= 3.5 / duration;
 		}
 	}
 
-	points *= trades->size();
-
+	double fitness = points;
 	delete trades;
 
-	return double(positive - negative) * std::abs(points);
+	return fitness;
 }
 
 BinaryTreeChromosome* TradingSystem::PerformAnalysis(
@@ -68,6 +59,8 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 	double logicalNodeMutationProbability,
 	double leafIndicatorMutationProbability,
 	double crossoverProbability,
+	double pipInDecimals,
+	double spread,
 	BinaryTreeChromosome* chromosomeToStartWith,
 	std::function<void(double fitness, BinaryTreeChromosome * chromosome, int generation)> update
 )
@@ -80,7 +73,7 @@ BinaryTreeChromosome* TradingSystem::PerformAnalysis(
 	std::vector<BinaryTreeChromosome *> front_buffer = std::vector<BinaryTreeChromosome *>();
 	std::vector<BinaryTreeChromosome *> back_buffer = std::vector<BinaryTreeChromosome *>();
 
-	BinaryTreeFitness fitness(&(EvaluateFitness), &dataSet);
+	BinaryTreeFitness fitness(&(EvaluateFitness), &dataSet, pipInDecimals, spread);
 
 	BinaryTreeGeneticAlgo selection = BinaryTreeGeneticAlgo(
 		selectionAmount,

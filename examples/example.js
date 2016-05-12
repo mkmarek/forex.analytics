@@ -19,8 +19,9 @@ var indicators = [
   'Stochastic'
 ];
 
-var stopLoss = 0.0030;
-var takeProfit = 0.0030;
+var stopLoss = 0.0050;
+var takeProfit = 0.0100;
+var pipInDecimals = 0.0001;
 
 /**
  * Training csv file worth of 6 month data
@@ -117,7 +118,7 @@ function createStrategy(candlesticks, testing30MinuteCandlesticks) {
   var lastFitness = -1;
 
   return analytics.findStrategy(candlesticks, {
-    populationCount: 3000,
+    populationCount: 2000,
     generationCount: 100,
     selectionAmount: 10,
     leafValueMutationProbability: 0.3,
@@ -125,6 +126,8 @@ function createStrategy(candlesticks, testing30MinuteCandlesticks) {
     logicalNodeMutationProbability: 0.05,
     leafIndicatorMutationProbability: 0.2,
     crossoverProbability: 0.03,
+    pipInDecimals : pipInDecimals,
+    spread : 3,
     indicators: indicators
   }, function(strategy, fitness, generation) {
 
