@@ -88,7 +88,9 @@ Finds the optimal strategy for a certain period defined by the *candlesticks* ar
  leafIndicatorMutationProbability: 0.2,
  crossoverProbability: 0.03,
  indicators: [ 'CCI', 'MACD', 'RSI', 'SMA15_SMA50' ],
- strategy: { buy : {...}, sell : {...} }
+ strategy: { buy : {...}, sell : {...} },
+ pipInDecimals : 0.001,
+ spread : 3
 }
 ```
 
@@ -97,6 +99,11 @@ Finds the optimal strategy for a certain period defined by the *candlesticks* ar
  strategy found in a certain generation. **Fitness** is a fitness value of a certain strategy calculated by fitness evaluation algorithm.
  **Generation** is the number of generation which was just completed. The **strategy** parameter describes which
  strategy it shall use as a referential. This parameter is not mandatory.
+
+ The **pipInDecimals** parameter describes how much is one pip for a certain currency pair which you are analyzing.
+ This parameter is mandatory.
+ 
+ **Spread** then defines the difference between buy and sell prices in pips.
 
  ```javascript
  function progressCallback(strategy, fitness, generation) {
@@ -123,7 +130,9 @@ analytics.findStrategy(candlesticks, {
   logicalNodeMutationProbability: 0.3,
   leafIndicatorMutationProbability: 0.2,
   crossoverProbability: 0.03,
-  indicators: indicators
+  indicators: indicators,
+  pipInDecimals : 0.001,
+  spread : 3
 
 }, function(strategy, fitness, generation) {
   console.log('Fitness: ' + fitness + '; Generation: ' + generation);
