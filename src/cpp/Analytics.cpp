@@ -5,7 +5,7 @@
 #include "../include/Analytics.h"
 #include "../include/TradingSimulator.h"
 #include "../include/utils/HeapSort.h"
-#include "../include/fitnessEvaluation.h"
+#include "../include/FitnessEvaluation.h"
 
 
 BinaryTreeChromosome* Analytics::PerformAnalysis(
