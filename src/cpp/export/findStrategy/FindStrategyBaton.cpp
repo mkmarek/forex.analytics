@@ -1,4 +1,4 @@
-#include "../../../include/export/findStrategy/findStrategyBaton.h"
+#include "../../../include/export/findStrategy/FindStrategyBaton.h"
 #include "../../../include/utils/Utils.h"
 
 FindStrategyBaton::FindStrategyBaton() {
