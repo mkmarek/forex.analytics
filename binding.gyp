@@ -19,23 +19,27 @@
         }]
       ],
       "sources": [
-        "src_cpp/Analytics.cpp",
-        "src_cpp/TradingSimulator.cpp",
-        "src_cpp/BinaryTreeFitness.cpp",
-        "src_cpp/BinaryTreeChromosome.cpp",
-        "src_cpp/BinaryTreeGeneticAlgo.cpp",
-        "src_cpp/Export.cpp",
-        "src_cpp/FitnessEvaluation.cpp",
+        "src/cpp/Analytics.cpp",
+        "src/cpp/TradingSimulator.cpp",
+        "src/cpp/BinaryTreeFitness.cpp",
+        "src/cpp/BinaryTreeChromosome.cpp",
+        "src/cpp/BinaryTreeGeneticAlgo.cpp",
 
-        "src_cpp/nodes/IndicatorTreeNode.cpp",
-        "src_cpp/nodes/OperatorTreeNode.cpp",
-        "src_cpp/nodes/TreeNode.cpp",
+        "src/cpp/nodes/IndicatorTreeNode.cpp",
+        "src/cpp/nodes/OperatorTreeNode.cpp",
+        "src/cpp/nodes/TreeNode.cpp",
 
-        "src_cpp/utils/HeapSort.cpp",
+        "src/cpp/utils/HeapSort.cpp",
 
-        "src_cpp/functions/findStrategy.cpp",
-        "src_cpp/functions/getMarketStatus.cpp",
-        "src_cpp/functions/getTrades.cpp"
+        "src/cpp/export/findStrategy/export.cpp",
+        "src/cpp/export/findStrategy/FindStrategyAsyncWorker.cpp",
+        "src/cpp/export/findStrategy/FindStrategyBaton.cpp",
+
+        "src/cpp/export/getMarketStatus/export.cpp",
+        "src/cpp/export/getTrades/export.cpp",
+        "src/cpp/export/Export.cpp",
+
+        "src/cpp/utils/Utils.cpp",
       ]
     }
   ]

@@ -1,5 +1,5 @@
 var analytics = require('./build/Release/analytics.node')
-var convertOhlc = require('./src_js/convertOhlc')
+var convertOhlc = require('./src/js/convertOhlc')
 
 /**
  * Translate findStrategy callback signature to promise due to weird behaviour

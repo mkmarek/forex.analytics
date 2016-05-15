@@ -14,7 +14,8 @@
     "preinstall": "node ./lib/ta-lib/build.js",
     "postinstall": "node-gyp configure && node-gyp build",
     "clean": "node ./lib/ta-lib/clean.js",
-    "test": "node mocha"
+    "test": "node mocha",
+    "cppcheck" : "cppcheck --enable=all src"
   },
   "gypfile": true,
   "keywords": [
