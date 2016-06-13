@@ -202,7 +202,7 @@ loadCsvData(testingFile, function(testingCandlesticks) {
     createStrategy(thirtyMinuteCandlesticks, testing30MinuteCandlesticks)
       .then(function(strategy) {
         console.log('------------Strategy-------------');
-        console.log(JSON.stringify(strategy));
+        console.log(JSON.stringify(strategy, null, 4));
         console.log('---------------------------------');
 
         calculateTrades(testing30MinuteCandlesticks, strategy);
