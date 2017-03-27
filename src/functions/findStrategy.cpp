@@ -55,7 +55,7 @@ public:
 	explicit FindStrategyAsyncWorker(
 		Nan::Callback* callback_,
 		FindStrategyBaton* baton_)
-		: AsyncProgressWorker(callback_)
+		: AsyncProgressWorkerBase(callback_)
 	{
 		this->baton = baton_;
 	}
