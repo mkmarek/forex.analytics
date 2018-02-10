@@ -231,7 +231,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='csr|x64'">
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -158,28 +158,34 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='cdr|Win32'">
     <OutDir>.\..\..\..\..\..\lib\</OutDir>
     <IntDir>.\..\..\..\..\..\temp\$(Configuration)\$(ProjectName)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='cmd|Win32'">
     <OutDir>.\..\..\..\..\..\lib\</OutDir>
     <IntDir>.\..\..\..\..\..\temp\$(Configuration)\$(ProjectName)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='cdd|Win32'">
     <OutDir>.\..\..\..\..\..\lib\</OutDir>
     <IntDir>.\..\..\..\..\..\temp\$(Configuration)\$(ProjectName)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='cmr|Win32'">
     <OutDir>.\..\..\..\..\..\lib\</OutDir>
     <IntDir>.\..\..\..\..\..\temp\$(Configuration)\$(ProjectName)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='csr|Win32'">
     <OutDir>.\..\..\..\..\..\lib\</OutDir>
     <IntDir>.\..\..\..\..\..\temp\$(Configuration)\$(ProjectName)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
     <TargetExt>.a</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='csr|x64'">
     <TargetExt>.lib</TargetExt>
     <OutDir>.\..\..\..\..\..\lib\</OutDir>
     <IntDir>.\..\..\..\..\..\temp\$(Configuration)\$(ProjectName)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='cdr|Win32'">
     <ClCompile>
@@ -205,7 +211,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -240,7 +246,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -276,7 +282,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -311,7 +317,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -347,7 +353,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -382,7 +388,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -417,7 +423,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -452,7 +458,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -487,7 +493,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
@@ -522,7 +528,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\..\..\..\..\..\lib/$(ProjectName)_$(Configuration).lib</OutputFile>
+      <OutputFile>.\..\..\..\..\..\lib\$(ProjectName)_$(Configuration).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Xdcmake>
