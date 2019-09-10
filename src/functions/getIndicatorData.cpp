@@ -24,13 +24,13 @@ NAN_METHOD(getIndicatorData)
 
 	TradingSystem system;
 	std::vector<Candlestick> candlesticks;
-	v8::Handle<v8::Array> candlestickArray = v8::Handle<v8::Array>::Cast(info[0]);
+	v8::Local<v8::Array> candlestickArray = v8::Local<v8::Array>::Cast(info[0]);
 
 	Candlestick::CreateFromArray(candlesticks, candlestickArray);
 
-	v8::Handle<v8::Object> configuration = v8::Handle<v8::Object>::Cast(info[1]);
+	v8::Local<v8::Object> configuration = v8::Local<v8::Object>::Cast(info[1]);
 
-	v8::Handle<v8::Array> indicatorArray = v8::Handle<v8::Array>::Cast(
+	v8::Local<v8::Array> indicatorArray = v8::Local<v8::Array>::Cast(
 		configuration->Get(Nan::New<v8::String>("indicators").ToLocalChecked()));
 
 	std::vector<BaseIndicator *> indicators = IndicatorFactory::CreateFromArray(indicatorArray);

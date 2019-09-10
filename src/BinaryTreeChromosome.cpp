@@ -23,7 +23,7 @@ void BinaryTreeChromosome::Mutate(
 	double crossoverProbability,
 	double leafIndicatorMutationProbability
 	) {
-	
+
 	this->Mutate(leafValueMutationProbability,
 		leafValueSignMutationProbability,
 		logicalNodeMutationProbability,
@@ -60,7 +60,7 @@ void BinaryTreeChromosome::Mutate(
 			leafValueSignMutationProbability,
 			logicalNodeMutationProbability,
 			crossoverProbability,
-			leafIndicatorMutationProbability, 
+			leafIndicatorMutationProbability,
 			opNode->left);
 
 		this->Mutate(leafValueMutationProbability,
@@ -128,7 +128,7 @@ const std::vector<BaseIndicator *>& BinaryTreeChromosome::getIndicators() const 
 }
 
 TreeNode * BinaryTreeChromosome::GenerateTree(int index, int height) const {
-	
+
 	TreeNode * ret;
 
 	if (index < height - 1) {
@@ -167,7 +167,7 @@ bool BinaryTreeChromosome::shouldSell(const std::map<std::string, IndicatorData>
 	return this->sell->Evaluate(data);
 }
 
-void BinaryTreeChromosome::ToJs(v8::Handle<v8::Object>& input) const
+void BinaryTreeChromosome::ToJs(v8::Local<v8::Object>& input) const
 {
 	v8::Local<v8::Object> buy = Nan::New<v8::Object>();
 	v8::Local<v8::Object> sell = Nan::New<v8::Object>();
@@ -184,12 +184,12 @@ BinaryTreeChromosome * BinaryTreeChromosome::FromJs(
 	const v8::Local<v8::Object>& input) {
 
 
-	v8::Handle<v8::Object> buy = v8::Handle<v8::Object>::Cast(
+	v8::Local<v8::Object> buy = v8::Local<v8::Object>::Cast(
 		Nan::Get(input, Nan::New<v8::String>("buy")
 			.ToLocalChecked())
 		.ToLocalChecked());
 
-	v8::Handle<v8::Object> sell = v8::Handle<v8::Object>::Cast(
+	v8::Local<v8::Object> sell = v8::Local<v8::Object>::Cast(
 		Nan::Get(input, Nan::New<v8::String>("sell")
 			.ToLocalChecked())
 		.ToLocalChecked());

@@ -9,7 +9,7 @@ which produced profit in a certain period of time specified by the input OHLC da
 Running the source
 ---------------
 
-First if you don't have it yet. Install node-gyp for comiling the c++ source code;
+First if you don't have it yet. Install node-gyp for compiling the c++ source code;
 
 ```
 npm install -g node-gyp
@@ -25,7 +25,7 @@ npm install
 To do further builds you can use
 
 ```
-node-gyp build
+node-gyp configure && node-gyp build
 ```
 
 You can run embedded examples which are located in the examples folder

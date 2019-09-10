@@ -54,18 +54,18 @@ TreeNode* TreeNode::FromJs(
 		node = IndicatorTreeNode::FromJs(indicators, input);
 	}
 
-	if (input->Has(Nan::New<v8::String>("left").ToLocalChecked())) {
+	if (Nan::Has(input, Nan::New<v8::String>("left").ToLocalChecked()).FromJust()) {
 
-		v8::Handle<v8::Object> left =
-			v8::Handle<v8::Object>::Cast(input->Get(Nan::New<v8::String>("left").ToLocalChecked()));
+		v8::Local<v8::Object> left =
+			v8::Local<v8::Object>::Cast(input->Get(Nan::New<v8::String>("left").ToLocalChecked()));
 
 		node->left = TreeNode::FromJs(indicators, left);
 	}
 
-	if (input->Has(Nan::New<v8::String>("right").ToLocalChecked())) {
+	if (Nan::Has(input, Nan::New<v8::String>("right").ToLocalChecked()).FromJust()) {
 
-		v8::Handle<v8::Object> right =
-			v8::Handle<v8::Object>::Cast(input->Get(Nan::New<v8::String>("right").ToLocalChecked()));
+		v8::Local<v8::Object> right =
+			v8::Local<v8::Object>::Cast(input->Get(Nan::New<v8::String>("right").ToLocalChecked()));
 
 		node->right = TreeNode::FromJs(indicators, right);
 	}

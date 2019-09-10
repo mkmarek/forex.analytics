@@ -107,7 +107,7 @@ public:
 
 		if (baton->chromosome == nullptr) {
 
-			v8::Handle<v8::Value> argv[] =
+			v8::Local<v8::Value> argv[] =
 			{
 				Nan::Undefined(),
 				v8::Exception::TypeError(
@@ -121,7 +121,7 @@ public:
 
 			chromosomeToObject(baton, strategy);
 
-			v8::Handle<v8::Value> argv[] =
+			v8::Local<v8::Value> argv[] =
 			{
 				strategy,
 				Nan::Undefined()
@@ -145,7 +145,7 @@ public:
 	void HandleErrorCallback() override {
 		Nan::HandleScope scope;
 
-		v8::Handle<v8::Value> argv[] =
+		v8::Local<v8::Value> argv[] =
 		{
 			Nan::Undefined(),
 			v8::Exception::TypeError(
@@ -173,11 +173,11 @@ public:
 
 		chromosomeToObject(updateBaton, strategy);
 
-		v8::Handle<v8::Value> argv[] =
+		v8::Local<v8::Value> argv[] =
 		{
 			strategy,
-			v8::Handle<v8::Value>(Nan::New<v8::Number>(updateBaton->fitness)),
-			v8::Handle<v8::Value>(Nan::New<v8::Number>(updateBaton->generation)),
+			v8::Local<v8::Value>(Nan::New<v8::Number>(updateBaton->fitness)),
+			v8::Local<v8::Value>(Nan::New<v8::Number>(updateBaton->generation)),
 		};
 
 		this->baton->progress->Call(3, argv);
@@ -222,34 +222,34 @@ bool findStrategyValidateInput(const Nan::FunctionCallbackInfo<v8::Value>& args)
 	return true;
 }
 
-int getIntOrDefault(v8::Handle<v8::Object> object, const char* name, int def)
+int getIntOrDefault(v8::Local<v8::Object> object, const char* name, int def)
 {
-	if (!object->Has(Nan::New<v8::String>(name).ToLocalChecked()))
+	if (!Nan::Has(object, Nan::New<v8::String>(name).ToLocalChecked()).FromJust())
 		return def;
 
-	return object->Get(Nan::New<v8::String>(name).ToLocalChecked())->Int32Value();
+	return object->Get(Nan::New<v8::String>(name).ToLocalChecked())->Int32Value(Nan::GetCurrentContext()).FromJust();
 }
 
-double getNumberOrDefault(v8::Handle<v8::Object> object, const char* name, double def)
+double getNumberOrDefault(v8::Local<v8::Object> object, const char* name, double def)
 {
-	if (!object->Has(Nan::New<v8::String>(name).ToLocalChecked()))
+	if (!Nan::Has(object, Nan::New<v8::String>(name).ToLocalChecked()).FromJust())
 		return def;
 
-	return object->Get(Nan::New<v8::String>(name).ToLocalChecked())->NumberValue();
+	return object->Get(Nan::New<v8::String>(name).ToLocalChecked())->NumberValue(Nan::GetCurrentContext()).ToChecked();
 }
 
-v8::Handle<v8::Object> getObjectFromArguments(const Nan::FunctionCallbackInfo<v8::Value>& args, int index)
+v8::Local<v8::Object> getObjectFromArguments(const Nan::FunctionCallbackInfo<v8::Value>& args, int index)
 {
 	if (args.Length() - 1 >= index && !args[index]->IsUndefined())
-		return v8::Handle<v8::Object>::Cast(args[index]);
+		return v8::Local<v8::Object>::Cast(args[index]);
 
 	return Nan::New<v8::Object>();
 }
 
-v8::Handle<v8::Array> getArrayFromArguments(const Nan::FunctionCallbackInfo<v8::Value>& args, int index)
+v8::Local<v8::Array> getArrayFromArguments(const Nan::FunctionCallbackInfo<v8::Value>& args, int index)
 {
 	if (args.Length() - 1 >= index && !args[index]->IsUndefined())
-		return v8::Handle<v8::Array>::Cast(args[index]);
+		return v8::Local<v8::Array>::Cast(args[index]);
 
 	return Nan::New<v8::Array>();
 }
@@ -263,8 +263,8 @@ NAN_METHOD(findStrategy)
 		std::vector<std::string> indicatorNames;
 		std::vector<BaseIndicator *> indicators;
 
-		v8::Handle<v8::Array> candlestickArray = getArrayFromArguments(info, 0);
-		v8::Handle<v8::Object> configuration = getObjectFromArguments(info, 1);
+		v8::Local<v8::Array> candlestickArray = getArrayFromArguments(info, 0);
+		v8::Local<v8::Object> configuration = getObjectFromArguments(info, 1);
 
 		int populationCount = getIntOrDefault(
 			configuration, "populationCount", DEFAULT_POPULATION_COUNT);
@@ -294,13 +294,13 @@ NAN_METHOD(findStrategy)
 			DEFAULT_CROSSOVER_PROBABILITY);
 
 		//If the indicator array is present use it to create indicators
-		if (configuration->Has(Nan::New<v8::String>("indicators").ToLocalChecked()))
+		if (Nan::Has(configuration, Nan::New<v8::String>("indicators").ToLocalChecked()).FromJust())
 		{
-			v8::Handle<v8::Array> indicatorArray = v8::Handle<v8::Array>::Cast(configuration->Get(Nan::New<v8::String>("indicators").ToLocalChecked()));
+			v8::Local<v8::Array> indicatorArray = v8::Local<v8::Array>::Cast(configuration->Get(Nan::New<v8::String>("indicators").ToLocalChecked()));
 
 			for (unsigned i = 0; i < indicatorArray->Length(); i++)
 			{
-				BaseIndicator* indicator = IndicatorFactory::Create(std::string(*v8::String::Utf8Value(indicatorArray->Get(i)->ToString())));
+				BaseIndicator* indicator = IndicatorFactory::Create(std::string(*v8::String::Utf8Value(v8::Isolate::GetCurrent(), Nan::To<v8::String>(indicatorArray->Get(i)).ToLocalChecked())));
 				indicators.push_back(indicator);
 			}
 		}
@@ -329,9 +329,9 @@ NAN_METHOD(findStrategy)
 
 		baton->startingChromosome = nullptr;
 
-		if (configuration->Has(Nan::New<v8::String>("strategy").ToLocalChecked()))
+		if (Nan::Has(configuration, Nan::New<v8::String>("strategy").ToLocalChecked()).FromJust())
 		{
-			v8::Handle<v8::Object> strategy = v8::Handle<v8::Object>::Cast(
+			v8::Local<v8::Object> strategy = v8::Local<v8::Object>::Cast(
 				configuration->Get(Nan::New<v8::String>("strategy").ToLocalChecked()));
 
 			BinaryTreeChromosome* chromosome = BinaryTreeChromosome::FromJs(

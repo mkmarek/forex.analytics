@@ -12,7 +12,7 @@ class BinaryTreeChromosome
 {
 
 private:
-	
+
 	/**
 	 * A vector of pointers to indicators used for further data evaluation
 	 */
@@ -130,5 +130,5 @@ public:
 		const v8::Local<v8::Object>& input);
 
 
-	void ToJs(v8::Handle<v8::Object>& input) const;
+	void ToJs(v8::Local<v8::Object>& input) const;
 };

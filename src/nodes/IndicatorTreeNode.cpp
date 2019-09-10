@@ -98,17 +98,15 @@ TreeNode* IndicatorTreeNode::FromJs(
   const std::vector<BaseIndicator*>& indicators,
   const v8::Local<v8::Object>& input) {
 
-    if (!input->Has(Nan::New<v8::String>("indicator").ToLocalChecked()) ||
-        !input->Has(Nan::New<v8::String>("sign").ToLocalChecked()) ||
-        !input->Has(Nan::New<v8::String>("value").ToLocalChecked())
-        )
-      return nullptr;
 
-    std::string sign =
-      std::string(*v8::String::Utf8Value(
-        input->Get(Nan::New<v8::String>("sign").ToLocalChecked())
-        ->ToString()));
+  if ((!Nan::Has(input, Nan::New<v8::String>("indicator").ToLocalChecked()).FromJust()) ||
+      (!Nan::Has(input, Nan::New<v8::String>("sign").ToLocalChecked()).FromJust()) ||
+      (!Nan::Has(input, Nan::New<v8::String>("value").ToLocalChecked()).FromJust()))
+    return nullptr;
 
+  std::string sign = std::string(*v8::String::Utf8Value(
+      v8::Isolate::GetCurrent(),
+      input->Get(Nan::New<v8::String>("sign").ToLocalChecked())));
     Sign s = Sign::Gt;
 
     for (int i = 0; i < 2; i++) {
@@ -120,11 +118,10 @@ TreeNode* IndicatorTreeNode::FromJs(
     IndicatorTreeNode* node = new IndicatorTreeNode(indicators);
     node->sign = s;
     node->indicator = std::string(*v8::String::Utf8Value(
-      input->Get(Nan::New<v8::String>("indicator").ToLocalChecked())
-      ->ToString()));
+      v8::Isolate::GetCurrent(),
+      input->Get(Nan::New<v8::String>("indicator").ToLocalChecked())));
 
-    node->value = input->Get(Nan::New<v8::String>("value").ToLocalChecked())
-      ->NumberValue();
+    node->value = input->Get(Nan::New<v8::String>("value").ToLocalChecked())->NumberValue(Nan::GetCurrentContext()).ToChecked();
 
     return node;
 }
