@@ -71,12 +71,12 @@ void OperatorTreeNode::ToJs(
 TreeNode* OperatorTreeNode::FromJs(
   const v8::Local<v8::Object>& input) {
 
-    if (!input->Has(Nan::New<v8::String>("operator").ToLocalChecked()))
+    if(!Nan::Has(input, Nan::New<v8::String>("operator").ToLocalChecked()).FromJust())
       return nullptr;
 
-    std::string oper =
-      std::string(*v8::String::Utf8Value(input->Get(Nan::New<v8::String>("operator").ToLocalChecked())
-        ->ToString()));
+    std::string oper = std::string(*v8::String::Utf8Value(
+      v8::Isolate::GetCurrent(),
+      input->Get(Nan::New<v8::String>("operator").ToLocalChecked())));
 
     Operator op = Operator::And;
 

@@ -29,10 +29,10 @@ NAN_METHOD(convertOHLC)
 
 	TradingSystem system;
 	std::vector<Candlestick> candlesticks;
-	auto candlestickArray = v8::Handle<v8::Array>::Cast(info[0]);
+	auto candlestickArray = v8::Local<v8::Array>::Cast(info[0]);
 
 	Candlestick::CreateFromArray(candlesticks, candlestickArray);
-	std::vector<Candlestick> outputCandlesticks = system.ConvertOHLCToLargerTimeframe(candlesticks, info[1]->Int32Value());
+	std::vector<Candlestick> outputCandlesticks = system.ConvertOHLCToLargerTimeframe(candlesticks, info[1]->Int32Value(Nan::GetCurrentContext()).FromJust());
 
 	auto output = Nan::New<v8::Array>();
 	Candlestick::ToArray(outputCandlesticks, output);

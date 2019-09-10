@@ -24,11 +24,11 @@ Candlestick Candlestick::CreateFromObject(
 
 	Candlestick c = Candlestick();
 
-	c.Open = input->Get(Nan::New<v8::String>("open").ToLocalChecked())->NumberValue();
-	c.Low = input->Get(Nan::New<v8::String>("low").ToLocalChecked())->NumberValue();
-	c.High = input->Get(Nan::New<v8::String>("high").ToLocalChecked())->NumberValue();
-	c.Close = input->Get(Nan::New<v8::String>("close").ToLocalChecked())->NumberValue();
-	c.Time = input->Get(Nan::New<v8::String>("time").ToLocalChecked())->Int32Value();
+	c.Open = input->Get(Nan::New<v8::String>("open").ToLocalChecked())->NumberValue(Nan::GetCurrentContext()).ToChecked();
+	c.Low = input->Get(Nan::New<v8::String>("low").ToLocalChecked())->NumberValue(Nan::GetCurrentContext()).ToChecked();
+	c.High = input->Get(Nan::New<v8::String>("high").ToLocalChecked())->NumberValue(Nan::GetCurrentContext()).ToChecked();
+	c.Close = input->Get(Nan::New<v8::String>("close").ToLocalChecked())->NumberValue(Nan::GetCurrentContext()).ToChecked();
+	c.Time = input->Get(Nan::New<v8::String>("time").ToLocalChecked())->Int32Value(Nan::GetCurrentContext()).ToChecked();
 
 	return c;
 }
@@ -47,7 +47,7 @@ void Candlestick::ToArray(
 
 		ToObject(candlestick, object);
 
-		output->Set(static_cast<uint32_t>(i), v8::Handle<v8::Value>::Cast(object));
+		output->Set(static_cast<uint32_t>(i), v8::Local<v8::Value>::Cast(object));
 	}
 }
 

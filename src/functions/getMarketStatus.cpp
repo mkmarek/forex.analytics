@@ -19,8 +19,8 @@ NAN_METHOD(getMarketStatus)
 		return;
 	}
 
-	v8::Handle<v8::Object> configuration = v8::Handle<v8::Object>::Cast(info[1]);
-	v8::Handle<v8::Array> candlestickArray = v8::Handle<v8::Array>::Cast(info[0]);
+	v8::Local<v8::Object> configuration = v8::Local<v8::Object>::Cast(info[1]);
+	v8::Local<v8::Array> candlestickArray = v8::Local<v8::Array>::Cast(info[0]);
 
 	std::vector<Candlestick> candlesticks;
 
@@ -28,7 +28,7 @@ NAN_METHOD(getMarketStatus)
 
 	std::vector<BaseIndicator *> indicators = IndicatorFactory::CreateAll();
 
-	v8::Handle<v8::Object> strategy = v8::Handle<v8::Object>::Cast(
+	v8::Local<v8::Object> strategy = v8::Local<v8::Object>::Cast(
 		configuration->Get(Nan::New<v8::String>("strategy").ToLocalChecked()));
 
 	TradingSystem system;

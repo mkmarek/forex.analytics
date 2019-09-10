@@ -66,14 +66,14 @@ bool IndicatorFactory::Register(const std::string name, const factoryMethod crea
 	return registeredPair.second;
 }
 
-std::vector<BaseIndicator *> IndicatorFactory::CreateFromArray(v8::Handle<v8::Array> array)
+std::vector<BaseIndicator *> IndicatorFactory::CreateFromArray(v8::Local<v8::Array> array)
 {
 	unsigned indicatorCount = array->Length();
 	std::vector<std::string> indicatorNames;
 
 	for (unsigned i = 0; i < indicatorCount; i++)
 	{
-		indicatorNames.push_back(std::string(*v8::String::Utf8Value(array->Get(i)->ToString())));
+		indicatorNames.push_back(std::string(*v8::String::Utf8Value(v8::Isolate::GetCurrent(), Nan::To<v8::String>(array->Get(i)).ToLocalChecked())));
 	}
 
 	std::vector<BaseIndicator *> indicators;
